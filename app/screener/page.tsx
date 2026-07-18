@@ -32,7 +32,7 @@ export default async function ScreenerPage() {
     try {
       const bars = await angelOneClient.getHistoricalDaily(s.ticker, fromDate, toDate)
       return { symbol: s.ticker, bars }
-    } catch (e) {
+    } catch {
       return { symbol: s.ticker, bars: [] }
     }
   })
@@ -49,7 +49,7 @@ export default async function ScreenerPage() {
     { id: 'Tight_Consolidation', fn: tightConsolidation },
     { id: 'Volume_Surge', fn: volumeSurge },
     { id: 'Near_52W_High', fn: near52WeekHigh },
-    { id: 'Relative_Strength', fn: (bars: any[], i: number) => relativeStrength(bars, i, benchmarkBars) }
+    { id: 'Relative_Strength', fn: (bars: { date: string, open: number, high: number, low: number, close: number, volume: number }[], i: number) => relativeStrength(bars, i, benchmarkBars) }
   ]
 
   const results = runScreener(rules, universe)

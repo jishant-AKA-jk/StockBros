@@ -22,7 +22,7 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 
   return NextResponse.json(data)
@@ -63,13 +63,13 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json(data)
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: (err as any).errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid data', details: err.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

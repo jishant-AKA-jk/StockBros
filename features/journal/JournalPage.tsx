@@ -5,6 +5,7 @@ import { Card, Button, Badge, Input, EyebrowLabel } from '@/components'
 
 import { PriceChart } from '@/features/charts/components/PriceChart'
 import { PriceBar } from '@/lib/types'
+import { getChartBars } from './actions'
 
 type JournalEntry = {
   id: string;
@@ -120,11 +121,8 @@ export function JournalPage() {
     setExpandedChart(id);
     if (!chartData[id]) {
       try {
-        const res = await fetch(`/api/chart/${symbol}`);
-        if (res.ok) {
-          const bars = await res.json();
-          setChartData(prev => ({ ...prev, [id]: bars }));
-        }
+        const bars = await getChartBars(symbol);
+        setChartData(prev => ({ ...prev, [id]: bars }));
       } catch (e) {
         console.error('Failed to load chart', e);
       }

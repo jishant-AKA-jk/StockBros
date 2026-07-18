@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Button, Card, Badge } from '@/components';
+import { Button, Card } from '@/components';
 
 export function ScreenerClient({ results }: { results: Record<string, string[]> }) {
   const [adding, setAdding] = useState<string | null>(null);
@@ -17,8 +17,8 @@ export function ScreenerClient({ results }: { results: Record<string, string[]> 
         throw new Error('Failed to add');
       }
       alert(`${symbol} added to watchlist!`);
-    } catch (e: any) {
-      alert(`Error: ${e.message}`);
+    } catch (e: unknown) {
+      alert(`Error: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setAdding(null);
     }

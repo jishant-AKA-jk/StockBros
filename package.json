@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync-symbols": "tsx --env-file=.env.local --conditions react-server scripts/syncDhanSymbols.ts",
+    "sync-symbols": "tsx --env-file=.env.local --conditions react-server scripts/syncAngelOneSymbols.ts",
     "fetch-sample": "tsx --env-file=.env.local --conditions react-server scripts/fetchSampleData.ts",
     "test": "jest"
   },

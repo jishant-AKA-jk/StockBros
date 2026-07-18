@@ -28,13 +28,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json(data)
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: (err as any).errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid data', details: err.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -55,7 +55,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     .eq('user_id', user.id)
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })

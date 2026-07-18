@@ -1,12 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { Button, Card, Badge } from '@/components';
+import { Button, Card } from '@/components';
+import { runScannerAction } from './actions';
 
 export default function ScannerPage() {
   const [ruleId, setRuleId] = useState('EMA_Stack');
   const [target, setTarget] = useState('universe');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<{ summary: { signalCount: number, winRate: number, averageForwardReturns: { day5: number | null, day10: number | null, day20: number | null } }, triggers: { date: string, symbol: string, forwardReturns: { day5: number | null, day10: number | null, day20: number | null } }[] } | null>(null);
   const [error, setError] = useState('');
 
   const runScan = async () => {
@@ -15,19 +16,10 @@ export default function ScannerPage() {
     setResult(null);
 
     try {
-      const res = await fetch('/api/scan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ruleId, target }),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to scan');
-      }
-      const data = await res.json();
+      const data = await runScannerAction({ ruleId, target });
       setResult(data);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -116,7 +108,7 @@ export default function ScannerPage() {
                 </tr>
               </thead>
               <tbody>
-                {result.triggers.map((t: any, i: number) => (
+                {result.triggers.map((t: { date: string, symbol: string, forwardReturns: { day5: number | null, day10: number | null, day20: number | null } }, i: number) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
                     <td className="p-2">{t.date}</td>
                     <td className="p-2 font-semibold">{t.symbol}</td>
