@@ -18,7 +18,7 @@ export function ChartGrid({ charts }: ChartGridProps) {
   const [ema, setEma] = useState<'off' | 10 | 20>('off');
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full p-4 md:p-6 bg-black">
+    <div className="flex flex-col gap-6 w-full h-full overflow-y-auto p-4 md:p-6 bg-black page-reveal">
       {/* Global Control Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg gap-4">
         <h2 className="text-xl font-bold text-white tracking-tight">Market Overview</h2>

@@ -11,11 +11,18 @@ const DHAN_ACCESS_TOKEN = process.env.DHAN_ACCESS_TOKEN;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.warn('Supabase credentials missing.');
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  if (!url || !key) {
+    return createClient('https://placeholder-url.supabase.co', 'placeholder-key');
+  }
+  if (!_supabase) {
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
 }
-
-const supabase = createClient(SUPABASE_URL || '', SUPABASE_SERVICE_KEY || '');
 
 class RateLimiter {
   private queue: Array<() => void> = [];
@@ -223,7 +230,7 @@ export async function getHistoricalDaily(
   }
 
   // 1. Get symbol details from database
-  const { data: symbolInfo, error: symbolError } = await supabase
+  const { data: symbolInfo, error: symbolError } = await getSupabase()
     .from('symbols')
     .select('ticker, exchange_segment')
     .eq('dhan_security_id', securityId)
@@ -240,7 +247,7 @@ export async function getHistoricalDaily(
   const instrument = 'EQUITY'; 
 
   // 2. Check cache
-  const { data: cachedData, error: cacheError } = await supabase
+  const { data: cachedData, error: cacheError } = await getSupabase()
     .from('price_cache')
     .select('date, open, high, low, close, volume')
     .eq('symbol', ticker)
@@ -309,7 +316,7 @@ export async function getHistoricalDaily(
         volume: bar.volume,
       }));
 
-      const { error: upsertError } = await supabase
+      const { error: upsertError } = await getSupabase()
         .from('price_cache')
         .upsert(rowsToInsert, { onConflict: 'symbol,date' });
 

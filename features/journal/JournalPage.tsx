@@ -143,18 +143,23 @@ export function JournalPage() {
   }, {} as Record<string, { trades: number, wins: number, totalR: number }>)
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8 bg-gray-50 min-h-screen font-serif">
+    <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 bg-gray-50 min-h-screen font-serif page-reveal">
       <div className="border-b-2 border-gray-900 pb-4">
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Trading Ledger</h1>
         <p className="text-gray-600 italic">Record, measure, and refine your edge.</p>
+        <p className="text-xs text-amber-800 mt-2 font-sans font-medium bg-amber-50 border border-amber-100 p-2.5 rounded">
+          * EOD Analytics Tool Disclaimer: StockBros is an end-of-day analytics and journal tool. It is not a live-trading or financial advice platform.
+        </p>
       </div>
 
       {/* Stats Panel */}
       <section>
         <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-gray-800">Performance by Setup</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(stats).length === 0 ? (
-             <div className="text-gray-500 italic">No closed trades yet to calculate stats.</div>
+             <div className="col-span-full text-sm text-gray-500 italic bg-white p-6 border border-dashed border-gray-300 rounded text-center shadow-sm font-sans">
+               No closed trades yet to calculate performance statistics.
+             </div>
           ) : Object.entries(stats).map(([tag, data]) => {
             const winRate = ((data.wins / data.trades) * 100).toFixed(1)
             const avgR = (data.totalR / data.trades).toFixed(2)
@@ -182,10 +187,10 @@ export function JournalPage() {
       <Card className="p-6 bg-white border-dashed border-2 border-gray-300 rounded-none">
         <h2 className="text-lg font-bold mb-4 font-sans">New Journal Entry</h2>
         <form onSubmit={handleAdd} className="space-y-4 font-sans">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
             <div>
               <EyebrowLabel>Symbol</EyebrowLabel>
-              <Input value={symbol} onChange={e => setSymbol(e.target.value)} required />
+              <Input value={symbol} onChange={e => setSymbol(e.target.value)} placeholder="e.g. RELIANCE" required />
             </div>
             <div>
               <EyebrowLabel>Setup</EyebrowLabel>
@@ -234,11 +239,11 @@ export function JournalPage() {
         <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-gray-800">Trade Ledger</h2>
         <div className="grid gap-6 md:grid-cols-2">
           {entries.map(entry => (
-            <Card key={entry.id} className="p-0 flex flex-col bg-[#fffdf0] border border-[#e2d5a3] shadow-sm rounded-none overflow-hidden relative">
+            <Card key={entry.id} className="p-0 flex flex-col bg-[#fffdf0] border border-[#e2d5a3] shadow-sm rounded-none overflow-hidden relative interactive-card">
               {/* Red line for index card feel */}
               <div className="absolute left-10 top-0 bottom-0 w-px bg-red-200"></div>
               
-              <div className="pl-14 p-4 font-sans relative z-10 flex flex-col h-full">
+              <div className="pl-12 sm:pl-14 p-4 font-sans relative z-10 flex flex-col h-full">
                 <div className="flex justify-between items-start mb-2 border-b border-blue-100 pb-2">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{entry.symbol}</h3>
@@ -266,16 +271,16 @@ export function JournalPage() {
                   ) : (
                     <div className="col-span-2 mt-2 pt-2 border-t border-dashed border-gray-300">
                       <form 
-                        className="flex gap-2 items-center"
+                        className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full"
                         onSubmit={(e) => {
                           e.preventDefault();
                           const fd = new FormData(e.currentTarget);
                           handleUpdateExit(entry.id, Number(fd.get('exitPrice')), String(fd.get('exitDate')));
                         }}
                       >
-                        <Input name="exitDate" type="date" required className="h-8 text-xs py-1" />
-                        <Input name="exitPrice" type="number" step="0.01" placeholder="Exit Price" required className="h-8 text-xs py-1" />
-                        <Button type="submit" className="h-8 text-xs py-1 rounded-none whitespace-nowrap bg-gray-700">Close Trade</Button>
+                        <Input name="exitDate" type="date" required className="h-8 text-xs py-1 w-full sm:w-auto" />
+                        <Input name="exitPrice" type="number" step="0.01" placeholder="Exit Price" required className="h-8 text-xs py-1 w-full sm:w-auto" />
+                        <Button type="submit" className="h-8 text-xs py-1 rounded-none whitespace-nowrap bg-gray-700 w-full sm:w-auto">Close Trade</Button>
                       </form>
                     </div>
                   )}
@@ -326,7 +331,10 @@ export function JournalPage() {
             </Card>
           ))}
           {entries.length === 0 && !loading && (
-            <div className="col-span-2 text-center text-gray-500 py-12">No trades logged yet.</div>
+            <div className="col-span-full text-center text-gray-500 py-12 bg-white border border-dashed border-gray-300 rounded shadow-sm font-sans">
+              <p className="font-semibold text-gray-700">No trades logged in ledger yet.</p>
+              <p className="text-sm text-gray-400 mt-1">Use the entry form above to log your first trade setup and track performance.</p>
+            </div>
           )}
         </div>
       </section>

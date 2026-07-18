@@ -86,7 +86,7 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     // Trigger cross-fade if timeframe or EMA changed
     if (prevProps.current.timeframe !== timeframe || prevProps.current.showEma !== showEma) {
       setIsFading(true);
-      setTimeout(() => setIsFading(false), 300);
+      setTimeout(() => setIsFading(false), 180);
       prevProps.current = { timeframe, showEma };
     }
 
@@ -122,12 +122,12 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
           {symbol} 
           <span className="text-xs text-neutral-400 font-normal">({timeframe})</span>
         </h3>
-        <span className="text-xs text-neutral-500">As of {asOfDate}</span>
+        <span className="text-xs text-neutral-400">Data as of last close: {asOfDate}</span>
       </div>
       <div className="relative flex-1 w-full min-h-[300px] p-2 bg-neutral-950">
         <div 
           ref={chartContainerRef} 
-          className={`absolute inset-0 m-2 transition-opacity duration-300 ease-in-out ${isFading ? 'opacity-30' : 'opacity-100'}`} 
+          className={`absolute inset-0 m-2 signature-transition ${isFading ? 'opacity-0' : 'opacity-100'}`} 
         />
       </div>
     </div>

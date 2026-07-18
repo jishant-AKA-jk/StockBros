@@ -20,7 +20,18 @@ const TOTP_SECRET = process.env.ANGELONE_TOTP_SECRET;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
 
-const supabase = createClient(SUPABASE_URL || '', SUPABASE_SERVICE_KEY || '');
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+  if (!url || !key) {
+    return createClient('https://placeholder-url.supabase.co', 'placeholder-key');
+  }
+  if (!_supabase) {
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
 
 class RateLimiter {
   private queue: Array<() => void> = [];
@@ -140,7 +151,7 @@ export class AngelOneClient {
         name: item.name,
       }));
 
-      const { error } = await supabase.from('symbols').upsert(batch, { onConflict: 'ticker' });
+      const { error } = await getSupabase().from('symbols').upsert(batch, { onConflict: 'ticker' });
       if (error) {
         console.error('Error upserting symbols batch', error);
       }
@@ -214,7 +225,7 @@ export class AngelOneClient {
     }
 
     // 1. Get symbol token
-    const { data: symbolInfo, error: symbolError } = await supabase
+    const { data: symbolInfo, error: symbolError } = await getSupabase()
       .from('symbols')
       .select('ticker, dhan_security_id')
       .eq('ticker', symbol)
@@ -230,7 +241,7 @@ export class AngelOneClient {
     const fromStr = this.formatISODate(fromDate);
     const toStr = this.formatISODate(toDate);
 
-    const { data: cachedData, error: cacheError } = await supabase
+    const { data: cachedData, error: cacheError } = await getSupabase()
       .from('price_cache')
       .select('date, open, high, low, close, volume')
       .eq('symbol', symbol)
@@ -291,7 +302,7 @@ export class AngelOneClient {
           volume: bar.volume,
         }));
 
-        const { error: upsertError } = await supabase
+        const { error: upsertError } = await getSupabase()
           .from('price_cache')
           .upsert(rowsToInsert, { onConflict: 'symbol,date' });
 

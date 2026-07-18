@@ -75,7 +75,7 @@ export function WatchlistPage() {
   if (loading) return <div className="p-8">Loading...</div>
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 space-y-8 page-reveal">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Watchlist</h1>
         <p className="text-gray-500">Track your favorite symbols by tags.</p>
@@ -117,7 +117,7 @@ export function WatchlistPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-3 capitalize border-b pb-2">{groupTag}</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {groupItems.map(item => (
-                <Card key={item.id} className="p-4 flex items-center justify-between">
+                <Card key={item.id} className="p-4 flex items-center justify-between interactive-card">
                   <div>
                     <div className="font-bold text-gray-900">{item.symbol}</div>
                     <div className="text-sm text-gray-500">Added {new Date(item.created_at).toLocaleDateString()}</div>
@@ -129,7 +129,10 @@ export function WatchlistPage() {
           </div>
         ))}
         {items.length === 0 && (
-          <div className="text-center text-gray-500 py-12">No symbols in watchlist yet.</div>
+          <div className="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500 shadow-sm">
+            <p className="font-medium text-gray-700">No symbols in watchlist yet.</p>
+            <p className="text-sm text-gray-400 mt-1">Use the form above to add a symbol (e.g., RELIANCE) to begin tracking.</p>
+          </div>
         )}
       </div>
     </div>

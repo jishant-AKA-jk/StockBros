@@ -25,3 +25,68 @@ body {
     text-wrap: balance;
   }
 }
+
+/* MOTION AND INTERACTION PASS RULES (MOTION.md) */
+
+/* 1. Signature transition for chart grid cross-fade (150-200ms ease-in-out) */
+.signature-transition {
+  transition: opacity 180ms ease-in-out;
+}
+
+/* 2. Page load reveal (single orchestrated reveal) */
+@keyframes pageReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-reveal {
+  animation: pageReveal 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 3. Interactive Card hover effects (subtle lift + shadow/border change, NO bounce/spring/scale) */
+.interactive-card {
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms ease-out, background-color 150ms ease-out;
+}
+
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* 4. Accessibility: prefers-reduced-motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .signature-transition {
+    transition: none !important;
+    opacity: 1 !important;
+  }
+  
+  .page-reveal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  .interactive-card {
+    transition: none !important;
+  }
+  
+  .interactive-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
