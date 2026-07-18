@@ -8,12 +8,14 @@ function calculateEMA(bars: PriceBar[], index: number, period: number): number |
   
   let sum = 0;
   for (let i = startIndex; i < startIndex + period; i++) {
+    if (!bars[i] || isNaN(bars[i].close)) return null;
     sum += bars[i].close;
   }
   let ema = sum / period;
   
   const k = 2 / (period + 1);
   for (let i = startIndex + period; i <= index; i++) {
+    if (!bars[i] || isNaN(bars[i].close)) return null;
     ema = (bars[i].close - ema) * k + ema;
   }
   
@@ -28,6 +30,7 @@ export function emaStack(bars: PriceBar[], index: number): boolean {
   
   if (ema10 === null || ema20 === null) return false;
   
+  if (!bars[index] || isNaN(bars[index].close)) return false;
   const currentPrice = bars[index].close;
   
   return currentPrice > ema10 && ema10 > ema20;
@@ -39,7 +42,7 @@ export function tightConsolidation(bars: PriceBar[], index: number, nDays: numbe
   
   for (let i = index - nDays + 1; i <= index; i++) {
     const bar = bars[i];
-    if (!bar || bar.close === 0 || isNaN(bar.close)) return false;
+    if (!bar || bar.close === 0 || isNaN(bar.close) || isNaN(bar.high) || isNaN(bar.low)) return false;
     const range = bar.high - bar.low;
     const rangePct = range / bar.close;
     if (rangePct > threshold) {
@@ -55,12 +58,12 @@ export function volumeSurge(bars: PriceBar[], index: number, multiplier: number 
   
   let sumVolume = 0;
   for (let i = index - period; i < index; i++) {
-    if (isNaN(bars[i].volume)) return false;
+    if (!bars[i] || isNaN(bars[i].volume)) return false;
     sumVolume += bars[i].volume;
   }
   const avgVolume = sumVolume / period;
   
-  if (avgVolume === 0) return false;
+  if (avgVolume === 0 || !bars[index] || isNaN(bars[index].volume)) return false;
   
   return bars[index].volume > avgVolume * multiplier;
 }
@@ -74,13 +77,13 @@ export function near52WeekHigh(bars: PriceBar[], index: number, threshold: numbe
   
   let highestHigh = 0;
   for (let i = startIndex; i <= index; i++) {
-    if (isNaN(bars[i].high)) continue;
+    if (!bars[i] || isNaN(bars[i].high)) continue;
     if (bars[i].high > highestHigh) {
       highestHigh = bars[i].high;
     }
   }
   
-  if (highestHigh === 0) return false;
+  if (highestHigh === 0 || !bars[index] || isNaN(bars[index].close)) return false;
   
   const currentClose = bars[index].close;
   return currentClose >= highestHigh * (1 - threshold);
@@ -95,15 +98,17 @@ export function relativeStrength(bars: PriceBar[], index: number, benchmarkBars:
   
   if (!targetDate || !startDate) return false;
   
-  const benchEndIdx = benchmarkBars.findIndex(b => b.date === targetDate);
-  const benchStartIdx = benchmarkBars.findIndex(b => b.date === startDate);
+  const benchEndIdx = benchmarkBars.findIndex(b => b?.date === targetDate);
+  const benchStartIdx = benchmarkBars.findIndex(b => b?.date === startDate);
   
   if (benchEndIdx === -1 || benchStartIdx === -1) return false;
+  
+  if (!bars[index - nDays] || !bars[index] || !benchmarkBars[benchStartIdx] || !benchmarkBars[benchEndIdx]) return false;
   
   const stockStartClose = bars[index - nDays].close;
   const benchStartClose = benchmarkBars[benchStartIdx].close;
   
-  if (stockStartClose === 0 || benchStartClose === 0 || isNaN(stockStartClose) || isNaN(benchStartClose)) return false;
+  if (stockStartClose === 0 || benchStartClose === 0 || isNaN(stockStartClose) || isNaN(benchStartClose) || isNaN(bars[index].close) || isNaN(benchmarkBars[benchEndIdx].close)) return false;
   
   const stockReturn = (bars[index].close - stockStartClose) / stockStartClose;
   const benchReturn = (benchmarkBars[benchEndIdx].close - benchStartClose) / benchStartClose;
