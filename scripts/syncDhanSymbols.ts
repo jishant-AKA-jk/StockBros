@@ -34,7 +34,7 @@ async function main() {
   console.log('Sample record:', records[0]);
   
   // Find NSE equities
-  const nseEquities = records.filter((r: Record<string, string>) => {
+  const nseEquities = (records as Record<string, string>[]).filter((r) => {
     // Exchange can be SEM_EXM_EXCH_ID = 'NSE'
     // Segment can be SEM_SEGMENT = 'EQ'
     // Let's rely on standard Dhan headers: SEM_EXM_EXCH_ID, SEM_SEGMENT, SEM_SMST_SECURITY_ID, SEM_CUSTOM_SYMBOL, SEM_TRADING_SYMBOL
@@ -51,7 +51,7 @@ async function main() {
   const toInsert = Array.from(
     new Map(
       nseEquities
-        .map((r: Record<string, string>) => ({
+        .map((r) => ({
           ticker: r.SEM_TRADING_SYMBOL,
           dhan_security_id: r.SEM_SMST_SECURITY_ID,
           exchange_segment: 'NSE_EQ',

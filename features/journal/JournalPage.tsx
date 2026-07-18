@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Button, Badge, Input, EyebrowLabel } from '@/components'
 
+import { PriceChart } from '@/features/charts/components/PriceChart'
+import { PriceBar } from '@/lib/types'
+
 type JournalEntry = {
   id: string;
   symbol: string;
@@ -20,6 +23,8 @@ export function JournalPage() {
   const [entries, setEntries] = useState<JournalEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [chartData, setChartData] = useState<Record<string, PriceBar[]>>({})
+  const [expandedChart, setExpandedChart] = useState<string | null>(null)
 
   // Form State
   const [symbol, setSymbol] = useState('')
@@ -104,6 +109,25 @@ export function JournalPage() {
       fetchJournal()
     } catch (err: any) {
       alert(err.message)
+    }
+  }
+
+  const toggleChart = async (id: string, symbol: string) => {
+    if (expandedChart === id) {
+      setExpandedChart(null);
+      return;
+    }
+    setExpandedChart(id);
+    if (!chartData[id]) {
+      try {
+        const res = await fetch(`/api/chart/${symbol}`);
+        if (res.ok) {
+          const bars = await res.json();
+          setChartData(prev => ({ ...prev, [id]: bars }));
+        }
+      } catch (e) {
+        console.error('Failed to load chart', e);
+      }
     }
   }
 
@@ -265,11 +289,41 @@ export function JournalPage() {
                   </div>
                 )}
 
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 flex justify-between items-center">
+                  <button onClick={() => toggleChart(entry.id, entry.symbol)} className="text-xs text-blue-500 hover:underline">
+                    {expandedChart === entry.id ? 'Hide Chart' : 'Show Chart'}
+                  </button>
                   <button onClick={() => handleRemove(entry.id)} className="text-xs text-red-500 hover:underline">
                     Delete
                   </button>
                 </div>
+
+                {expandedChart === entry.id && chartData[entry.id] && (
+                  <div className="mt-4 h-64 border-t border-gray-200 pt-4">
+                    <PriceChart 
+                      symbol={entry.symbol}
+                      bars={chartData[entry.id]}
+                      timeframe="1D"
+                      showEma="off"
+                      markers={[
+                        { 
+                          time: entry.entry_date.split('T')[0], 
+                          position: 'belowBar', 
+                          color: '#2196F3', 
+                          shape: 'arrowUp', 
+                          text: 'Entry' 
+                        },
+                        ...(entry.exit_date ? [{ 
+                          time: entry.exit_date.split('T')[0], 
+                          position: 'aboveBar', 
+                          color: '#e91e63', 
+                          shape: 'arrowDown', 
+                          text: 'Exit' 
+                        }] : [])
+                      ]}
+                    />
+                  </div>
+                )}
               </div>
             </Card>
           ))}

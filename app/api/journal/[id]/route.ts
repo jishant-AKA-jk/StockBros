@@ -63,7 +63,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json(data)
   } catch (err: any) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid data', details: err.errors }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid data', details: (err as any).errors }, { status: 400 })
     }
     return NextResponse.json({ error: 'Internal server error', message: err.message }, { status: 500 })
   }

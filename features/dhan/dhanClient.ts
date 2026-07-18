@@ -162,33 +162,24 @@ async function fetchHistoricalDailyFromDhanWithRetry(
       }
       
       const bars: PriceBar[] = [];
-      const len = data.data?.start_Time?.length || 0;
+      const responseData = data.data as any;
+      const len = responseData?.start_Time?.length || 0;
       
       for (let i = 0; i < len; i++) {
-        // Dhan returns unix timestamp in seconds or a date string, let's assume it's timestamp in epoch or date string.
-        // wait, usually they return array of objects or arrays of fields: open, high, low, close, volume, start_Time.
-        const ts = data.data.start_Time[i];
+        const ts = responseData.start_Time[i];
         let dateObj: Date;
-        // Dhan API docs for historical says: "data": { "open": [], "high": [], "low": [], "close": [], "volume": [], "start_Time": [] }
-        // start_Time is usually an epoch timestamp in seconds or milliseconds, need to handle appropriately.
-        // Wait, their start_time is an integer timestamp (in seconds or ms?). Let's assume seconds if < 2000000000, else ms.
-        // Wait, standard Dhan API v2 returns "start_Time" array. Let's just create a Date object.
-        // I will write a small timestamp parsing utility just in case.
         const tsNumber = typeof ts === 'string' ? parseFloat(ts) : ts as number;
-        // Dhan historically uses standard python/unix timestamp in seconds or custom timezone. Wait, Dhan API returns timestamp in seconds (epoch). Wait, actually they return it with 5 hours 30 mins added sometimes?
-        // Let's just do `new Date(tsNumber < 1e11 ? tsNumber * 1000 : tsNumber)` and get the YYYY-MM-DD.
         dateObj = new Date(tsNumber < 1e11 ? tsNumber * 1000 : tsNumber);
         
-        // ensure we only return date string (YYYY-MM-DD)
         const dateStr = dateObj.toISOString().split('T')[0];
         
         bars.push({
           date: dateStr,
-          open: data.data.open[i],
-          high: data.data.high[i],
-          low: data.data.low[i],
-          close: data.data.close[i],
-          volume: data.data.volume[i],
+          open: responseData.open[i],
+          high: responseData.high[i],
+          low: responseData.low[i],
+          close: responseData.close[i],
+          volume: responseData.volume[i],
         });
       }
       
