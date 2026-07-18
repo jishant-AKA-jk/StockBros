@@ -1,7 +1,13 @@
 import { PriceBar } from '@/lib/types';
 import { resampleDailyToWeekly, calculateEma } from './index';
 
+// PROTECTS AGAINST: Regressions in the daily->weekly chart resampling logic,
+// ensuring users always see accurate weekly OHLC and volume rollups.
 describe('resampleDailyToWeekly', () => {
+  it('should return empty array when provided empty array', () => {
+    expect(resampleDailyToWeekly([])).toEqual([]);
+  });
+
   it('should correctly resample daily bars into weekly bars', () => {
     const dailyBars: PriceBar[] = [
       { date: '2023-01-02', open: 100, high: 110, low: 90, close: 105, volume: 1000 },

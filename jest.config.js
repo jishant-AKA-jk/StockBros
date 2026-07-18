@@ -8,4 +8,9 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
+  setupFiles: ["dotenv/config"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1"
+  },
+  testPathIgnorePatterns: ["/tests/e2e/"]
 };

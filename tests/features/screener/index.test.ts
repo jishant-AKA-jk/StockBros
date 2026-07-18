@@ -10,6 +10,8 @@ import {
 } from '../../../features/screener';
 import { PriceBar } from '../../../lib/types';
 
+// PROTECTS AGAINST: Regressions in the Phase 1B technical screener logic,
+// ensuring the core logic for identifying trading setups remains accurate.
 describe('Screener Engine Rules', () => {
   const baseBar: PriceBar = { date: '2020-01-01', open: 100, high: 105, low: 95, close: 100, volume: 1000 };
 

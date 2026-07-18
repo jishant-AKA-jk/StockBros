@@ -9,7 +9,9 @@
     "lint": "next lint",
     "sync-symbols": "tsx --env-file=.env.local --conditions react-server scripts/syncAngelOneSymbols.ts",
     "fetch-sample": "tsx --env-file=.env.local --conditions react-server scripts/fetchSampleData.ts",
-    "test": "jest"
+    "test:unit": "jest",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
@@ -27,6 +29,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/otplib": "^7.0.0",
