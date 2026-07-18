@@ -17,18 +17,48 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRef = useRef<ISeriesApi<'Line'> | null>(null);
+
+  // Decoupled states for smooth cross-fade
+  const [displayBars, setDisplayBars] = useState<PriceBar[]>(bars);
+  const [displayTimeframe, setDisplayTimeframe] = useState<'1D' | '1W'>(timeframe);
+  const [displayShowEma, setDisplayShowEma] = useState<'off' | 10 | 20>(showEma);
+  const [displayMarkers, setDisplayMarkers] = useState<any[]>(markers);
   const [isFading, setIsFading] = useState(false);
-  const prevProps = useRef({ timeframe, showEma });
 
-  const formattedData = bars.map(bar => ({
-    time: bar.date,
-    open: bar.open,
-    high: bar.high,
-    low: bar.low,
-    close: bar.close,
-  }));
+  // Date formatter for last close date
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC'
+    });
+  };
 
-  const asOfDate = bars.length > 0 ? bars[bars.length - 1].date : '';
+  const asOfDate = displayBars.length > 0 ? formatDate(displayBars[displayBars.length - 1].date) : 'N/A';
+
+  // Synchronize props to display states with animation delay
+  useEffect(() => {
+    const hasChanged = timeframe !== displayTimeframe || showEma !== displayShowEma;
+    if (hasChanged) {
+      setIsFading(true);
+      const timer = setTimeout(() => {
+        setDisplayBars(bars);
+        setDisplayTimeframe(timeframe);
+        setDisplayShowEma(showEma);
+        setDisplayMarkers(markers);
+        setIsFading(false);
+      }, 180);
+      return () => clearTimeout(timer);
+    } else {
+      // Direct updates when timeframe/EMA do not change (initial load or update of bars/markers)
+      setDisplayBars(bars);
+      setDisplayMarkers(markers);
+    }
+  }, [bars, timeframe, showEma, markers, displayTimeframe, displayShowEma]);
 
   useEffect(() => {
     if (!chartContainerRef.current) return;
@@ -81,19 +111,22 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
   }, []);
 
   useEffect(() => {
-    if (!seriesRef.current || !chartRef.current || bars.length === 0) return;
+    if (!seriesRef.current || !chartRef.current || displayBars.length === 0) return;
 
-    // Trigger cross-fade if timeframe or EMA changed
-    if (prevProps.current.timeframe !== timeframe || prevProps.current.showEma !== showEma) {
-      setIsFading(true);
-      setTimeout(() => setIsFading(false), 180);
-      prevProps.current = { timeframe, showEma };
-    }
+    const formattedData = displayBars.map(bar => ({
+      time: bar.date,
+      open: bar.open,
+      high: bar.high,
+      low: bar.low,
+      close: bar.close,
+    }));
 
     seriesRef.current.setData(formattedData as any);
     
-    if (markers.length > 0) {
-      seriesRef.current.setMarkers(markers);
+    if (displayMarkers.length > 0) {
+      seriesRef.current.setMarkers(displayMarkers);
+    } else {
+      seriesRef.current.setMarkers([]);
     }
 
     if (emaSeriesRef.current) {
@@ -101,10 +134,10 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
       emaSeriesRef.current = null;
     }
 
-    if (showEma !== 'off') {
-      const emaData = calculateEma(bars, showEma);
+    if (displayShowEma !== 'off') {
+      const emaData = calculateEma(displayBars, displayShowEma);
       emaSeriesRef.current = chartRef.current.addLineSeries({
-        color: showEma === 10 ? '#2962FF' : '#FF6D00',
+        color: displayShowEma === 10 ? '#2962FF' : '#FF6D00',
         lineWidth: 2,
         crosshairMarkerVisible: false,
       });
@@ -113,14 +146,14 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     
     chartRef.current.timeScale().fitContent();
 
-  }, [bars, showEma, markers, timeframe]);
+  }, [displayBars, displayShowEma, displayMarkers, displayTimeframe]);
 
   return (
     <div className="flex flex-col h-full w-full bg-neutral-900 border border-neutral-800 rounded-lg shadow-md overflow-hidden relative">
       <div className="flex justify-between items-center p-3 z-10 border-b border-neutral-800 bg-neutral-900/50">
         <h3 className="text-white font-semibold flex items-baseline gap-2">
           {symbol} 
-          <span className="text-xs text-neutral-400 font-normal">({timeframe})</span>
+          <span className="text-xs text-neutral-400 font-normal">({displayTimeframe})</span>
         </h3>
         <span className="text-xs text-neutral-400">Data as of last close: {asOfDate}</span>
       </div>
@@ -129,6 +162,15 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
           ref={chartContainerRef} 
           className={`absolute inset-0 m-2 signature-transition ${isFading ? 'opacity-0' : 'opacity-100'}`} 
         />
+        {bars.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-950 text-neutral-400 text-sm font-sans p-4 text-center z-20">
+            <svg className="w-8 h-8 text-neutral-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span className="font-medium text-neutral-300">No historical price data available for {symbol}</span>
+            <span className="text-xs text-neutral-500 mt-1">Check if API credentials are correct or try seeding the symbol.</span>
+          </div>
+        )}
       </div>
     </div>
   );

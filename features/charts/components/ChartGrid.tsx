@@ -21,7 +21,12 @@ export function ChartGrid({ charts }: ChartGridProps) {
     <div className="flex flex-col gap-6 w-full h-full overflow-y-auto p-4 md:p-6 bg-black page-reveal">
       {/* Global Control Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg gap-4">
-        <h2 className="text-xl font-bold text-white tracking-tight">Market Overview</h2>
+        <div className="flex flex-col">
+          <h2 className="text-xl font-bold text-white tracking-tight">Market Overview</h2>
+          <p className="text-xs text-neutral-400 mt-1 max-w-md font-sans">
+            EOD swing trading analytics (not live-trading or investment advice).
+          </p>
+        </div>
         
         <div className="flex flex-wrap gap-4">
           <div className="flex bg-neutral-950 border border-neutral-800 rounded-lg p-1">

@@ -71,8 +71,13 @@ export function WatchlistPage() {
     acc[t].push(item)
     return acc
   }, {} as Record<string, WatchlistItem[]>)
-
-  if (loading) return <div className="p-8">Loading...</div>
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center text-gray-500 font-sans mt-20">
+        <div className="inline-block text-lg font-medium">Loading watchlist...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8 page-reveal">
@@ -80,10 +85,9 @@ export function WatchlistPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Watchlist</h1>
         <p className="text-gray-500">Track your favorite symbols by tags.</p>
       </div>
-
       <Card className="p-6">
-        <form onSubmit={handleAdd} className="flex gap-4 items-end">
-          <div className="flex-1">
+        <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
             <EyebrowLabel className="mb-2">Symbol</EyebrowLabel>
             <Input 
               value={symbol} 
@@ -92,7 +96,7 @@ export function WatchlistPage() {
               required 
             />
           </div>
-          <div className="w-48">
+          <div>
             <EyebrowLabel className="mb-2">Tag</EyebrowLabel>
             <select 
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
@@ -106,7 +110,7 @@ export function WatchlistPage() {
               <option value="other">Other</option>
             </select>
           </div>
-          <Button type="submit">Add to Watchlist</Button>
+          <Button type="submit" className="w-full">Add to Watchlist</Button>
         </form>
         {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
       </Card>

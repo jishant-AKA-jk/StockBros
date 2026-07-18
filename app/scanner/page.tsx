@@ -26,12 +26,20 @@ export default function ScannerPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold">Historical Scanner</h1>
+    <div className="max-w-6xl mx-auto p-6 space-y-8 page-reveal">
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Historical Scanner</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Backtest and scan historical technical setups over the seeded universe or your watchlist.
+        </p>
+        <div className="mt-2 text-xs text-amber-800 font-sans font-medium bg-amber-50 border border-amber-100 p-2.5 rounded max-w-3xl">
+          * EOD Analytics Tool Disclaimer: StockBros is an end-of-day (EOD) swing trading analytics scanner. It is not a live-trading or financial advice platform.
+        </div>
+      </div>
       
       <Card className="p-6 space-y-4">
-        <div className="flex gap-4 items-end">
-          <div className="flex-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+          <div>
             <label className="block text-sm font-medium mb-1">Rule</label>
             <select 
               className="w-full border border-gray-300 rounded p-2"
@@ -45,7 +53,7 @@ export default function ScannerPage() {
               <option value="Relative_Strength">Relative Strength</option>
             </select>
           </div>
-          <div className="flex-1">
+          <div>
             <label className="block text-sm font-medium mb-1">Target</label>
             <select 
               className="w-full border border-gray-300 rounded p-2"
@@ -56,7 +64,7 @@ export default function ScannerPage() {
               <option value="watchlist">My Watchlist</option>
             </select>
           </div>
-          <Button onClick={runScan} disabled={loading}>
+          <Button onClick={runScan} disabled={loading} className="w-full">
             {loading ? 'Scanning...' : 'Run Scan'}
           </Button>
         </div>
@@ -67,7 +75,7 @@ export default function ScannerPage() {
         <div className="space-y-6">
           <Card className="p-6">
             <h2 className="text-xl font-bold mb-4">Summary Stats</h2>
-            <div className="grid grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-sm text-gray-500">Total Signals</div>
                 <div className="text-2xl font-semibold">{result.summary.signalCount}</div>

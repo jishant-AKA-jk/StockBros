@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button, Card } from '@/components';
 
-export function ScreenerClient({ results }: { results: Record<string, string[]> }) {
+export function ScreenerClient({ results, lastCloseDate }: { results: Record<string, string[]>; lastCloseDate: string }) {
   const [adding, setAdding] = useState<string | null>(null);
 
   const handleAdd = async (symbol: string) => {
@@ -24,11 +24,33 @@ export function ScreenerClient({ results }: { results: Record<string, string[]> 
     }
   };
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr || dateStr === 'N/A') return 'N/A';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC'
+    });
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 page-reveal">
-      <div>
-        <h1 className="text-3xl font-bold">Screener Results</h1>
-        <p className="text-gray-600 mt-1">Matches from the seeded universe run against standard technical rules.</p>
+      <div className="flex flex-col md:flex-row md:items-baseline md:justify-between border-b pb-4 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Screener Results</h1>
+          <p className="text-gray-600 mt-1">Matches from the seeded universe run against standard technical rules.</p>
+        </div>
+        <div className="text-left md:text-right font-sans">
+          <span className="inline-block text-xs font-semibold text-blue-800 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-md mb-1.5">
+            Data as of last close: {formatDate(lastCloseDate)}
+          </span>
+          <p className="text-xs text-gray-400">
+            EOD swing trading analytics (not live-trading or investment advice).
+          </p>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

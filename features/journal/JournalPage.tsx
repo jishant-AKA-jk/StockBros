@@ -142,6 +142,14 @@ export function JournalPage() {
     return acc;
   }, {} as Record<string, { trades: number, wins: number, totalR: number }>)
 
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto p-6 text-center text-gray-500 font-sans mt-20">
+        <div className="inline-block text-lg font-medium">Loading trading ledger...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 bg-gray-50 min-h-screen font-serif page-reveal">
       <div className="border-b-2 border-gray-900 pb-4">
