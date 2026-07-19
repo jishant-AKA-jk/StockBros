@@ -27,12 +27,12 @@ export default function ScannerPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8 page-reveal">
-      <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Historical Scanner</h1>
-        <p className="text-sm text-gray-500 mt-1">
+      <div className="border-b border-hairline pb-4">
+        <h1 className="text-3xl font-bold text-ink tracking-tight font-display">Historical Scanner</h1>
+        <p className="text-sm text-ink-light mt-1 font-sans">
           Backtest and scan historical technical setups over the seeded universe or your watchlist.
         </p>
-        <div className="mt-2 text-xs text-amber-800 font-sans font-medium bg-amber-50 border border-amber-100 p-2.5 rounded max-w-3xl">
+        <div className="mt-2 text-xs text-signature font-sans font-medium bg-signature/10 border border-signature/20 p-2.5 rounded max-w-3xl">
           * EOD Analytics Tool Disclaimer: StockBros is an end-of-day (EOD) swing trading analytics scanner. It is not a live-trading or financial advice platform.
         </div>
       </div>
@@ -40,9 +40,9 @@ export default function ScannerPage() {
       <Card className="p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
           <div>
-            <label className="block text-sm font-medium mb-1">Rule</label>
+            <label className="block text-sm font-medium mb-1 text-ink">Rule</label>
             <select 
-              className="w-full border border-gray-300 rounded p-2"
+              className="w-full border border-hairline bg-surface text-ink rounded p-2 focus:ring-primary focus:border-primary"
               value={ruleId} 
               onChange={e => setRuleId(e.target.value)}
             >
@@ -54,9 +54,9 @@ export default function ScannerPage() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Target</label>
+            <label className="block text-sm font-medium mb-1 text-ink">Target</label>
             <select 
-              className="w-full border border-gray-300 rounded p-2"
+              className="w-full border border-hairline bg-surface text-ink rounded p-2 focus:ring-primary focus:border-primary"
               value={target} 
               onChange={e => setTarget(e.target.value)}
             >
@@ -74,27 +74,27 @@ export default function ScannerPage() {
       {result && (
         <div className="space-y-6">
           <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Summary Stats</h2>
+            <h2 className="text-xl font-bold mb-4 text-ink font-display">Summary Stats</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
-                <div className="text-sm text-gray-500">Total Signals</div>
-                <div className="text-2xl font-semibold">{result.summary.signalCount}</div>
+                <div className="text-sm text-ink-light font-sans">Total Signals</div>
+                <div className="text-2xl font-semibold text-ink">{result.summary.signalCount}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Win Rate (10-Day)</div>
-                <div className="text-2xl font-semibold">{result.summary.winRate.toFixed(1)}%</div>
+                <div className="text-sm text-ink-light font-sans">Win Rate (10-Day)</div>
+                <div className="text-2xl font-semibold text-ink">{result.summary.winRate.toFixed(1)}%</div>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Avg 5D Return</div>
-                <div className="text-2xl font-semibold">
+                <div className="text-sm text-ink-light font-sans">Avg 5D Return</div>
+                <div className="text-2xl font-semibold text-ink">
                   {result.summary.averageForwardReturns.day5 !== null 
                     ? (result.summary.averageForwardReturns.day5 * 100).toFixed(2) + '%' 
                     : 'N/A'}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-gray-500">Avg 20D Return</div>
-                <div className="text-2xl font-semibold">
+                <div className="text-sm text-ink-light font-sans">Avg 20D Return</div>
+                <div className="text-2xl font-semibold text-ink">
                   {result.summary.averageForwardReturns.day20 !== null 
                     ? (result.summary.averageForwardReturns.day20 * 100).toFixed(2) + '%' 
                     : 'N/A'}
@@ -103,11 +103,11 @@ export default function ScannerPage() {
             </div>
           </Card>
 
-          <h2 className="text-xl font-bold mt-8">Recent Triggers (up to 100)</h2>
+          <h2 className="text-xl font-bold mt-8 text-ink font-display">Recent Triggers (up to 100)</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse font-sans">
               <thead>
-                <tr className="border-b">
+                <tr className="border-b border-hairline text-ink-light">
                   <th className="p-2">Date</th>
                   <th className="p-2">Symbol</th>
                   <th className="p-2">5D Return</th>
@@ -117,7 +117,7 @@ export default function ScannerPage() {
               </thead>
               <tbody>
                 {result.triggers.map((t: { date: string, symbol: string, forwardReturns: { day5: number | null, day10: number | null, day20: number | null } }, i: number) => (
-                  <tr key={i} className="border-b hover:bg-gray-50">
+                  <tr key={i} className="border-b border-hairline hover:bg-paper transition-colors text-ink">
                     <td className="p-2">{t.date}</td>
                     <td className="p-2 font-semibold">{t.symbol}</td>
                     <td className="p-2">{t.forwardReturns.day5 !== null ? (t.forwardReturns.day5 * 100).toFixed(2) + '%' : '-'}</td>
@@ -127,7 +127,7 @@ export default function ScannerPage() {
                 ))}
                 {result.triggers.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-4 text-center text-gray-500">No triggers found.</td>
+                    <td colSpan={5} className="p-4 text-center text-ink-light">No triggers found.</td>
                   </tr>
                 )}
               </tbody>

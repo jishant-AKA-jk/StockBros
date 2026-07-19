@@ -146,7 +146,7 @@ export class AngelOneClient {
     for (let i = 0; i < equities.length; i += batchSize) {
       const batch = equities.slice(i, i + batchSize).map((item) => ({
         ticker: item.symbol.replace('-EQ', ''), // Strip -EQ for cleaner tickers
-        dhan_security_id: item.token, // Reusing existing schema
+        dhan_security_id: item.token, // Reusing existing schema column for Angel One tokens
         exchange_segment: item.exch_seg,
         name: item.name,
       }));

@@ -18,48 +18,48 @@ export function ChartGrid({ charts }: ChartGridProps) {
   const [ema, setEma] = useState<'off' | 10 | 20>('off');
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full overflow-y-auto p-4 md:p-6 bg-black page-reveal">
+    <div className="flex flex-col gap-6 w-full h-full overflow-y-auto p-4 md:p-6 page-reveal">
       {/* Global Control Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-surface border border-hairline p-4 rounded-xl shadow-card gap-4">
         <div className="flex flex-col">
-          <h2 className="text-xl font-bold text-white tracking-tight">Market Overview</h2>
-          <p className="text-xs text-neutral-400 mt-1 max-w-md font-sans">
+          <h2 className="text-xl font-bold text-ink tracking-tight font-display">Market Overview</h2>
+          <p className="text-xs text-ink-light mt-1 max-w-md font-sans">
             EOD swing trading analytics (not live-trading or investment advice).
           </p>
         </div>
         
         <div className="flex flex-wrap gap-4">
-          <div className="flex bg-neutral-950 border border-neutral-800 rounded-lg p-1">
+          <div className="flex bg-paper border border-hairline rounded-lg p-1 shadow-inner">
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${timeframe === '1D' ? 'bg-neutral-800 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50'}`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${timeframe === '1D' ? 'bg-surface border border-hairline text-ink shadow-sm' : 'text-ink-light hover:text-ink hover:bg-surface/50'}`}
               onClick={() => setTimeframe('1D')}
             >
               Daily
             </button>
             <button 
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${timeframe === '1W' ? 'bg-neutral-800 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50'}`}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${timeframe === '1W' ? 'bg-surface border border-hairline text-ink shadow-sm' : 'text-ink-light hover:text-ink hover:bg-surface/50'}`}
               onClick={() => setTimeframe('1W')}
             >
               Weekly
             </button>
           </div>
           
-          <div className="flex bg-neutral-950 border border-neutral-800 rounded-lg p-1 items-center gap-1">
-            <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider px-2">EMA</span>
+          <div className="flex bg-paper border border-hairline rounded-lg p-1 items-center gap-1 shadow-inner">
+            <span className="text-xs font-semibold text-ink-light uppercase tracking-wider px-2">EMA</span>
             <button 
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 'off' ? 'bg-neutral-800 text-white shadow-sm' : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/50'}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 'off' ? 'bg-surface border border-hairline text-ink shadow-sm' : 'text-ink-light hover:text-ink hover:bg-surface/50'}`}
               onClick={() => setEma('off')}
             >
               Off
             </button>
             <button 
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 10 ? 'bg-neutral-800 text-blue-400 shadow-sm' : 'text-neutral-400 hover:text-blue-400/70 hover:bg-neutral-800/50'}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 10 ? 'bg-surface border border-primary text-primary shadow-sm' : 'text-ink-light hover:text-primary hover:bg-surface/50'}`}
               onClick={() => setEma(10)}
             >
               10
             </button>
             <button 
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 20 ? 'bg-neutral-800 text-orange-400 shadow-sm' : 'text-neutral-400 hover:text-orange-400/70 hover:bg-neutral-800/50'}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${ema === 20 ? 'bg-surface border border-signature text-signature shadow-sm' : 'text-ink-light hover:text-signature hover:bg-surface/50'}`}
               onClick={() => setEma(20)}
             >
               20

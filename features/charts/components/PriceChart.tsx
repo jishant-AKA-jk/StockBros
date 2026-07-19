@@ -66,11 +66,11 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#D9D9D9',
+        textColor: '#2c2c2a', // text-ink-light approx
       },
       grid: {
-        vertLines: { color: '#2B2B2B' },
-        horzLines: { color: '#2B2B2B' },
+        vertLines: { color: '#e5e0d8' }, // hairline approx
+        horzLines: { color: '#e5e0d8' },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
@@ -78,19 +78,19 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight || 300,
       timeScale: {
-        borderColor: '#2B2B2B',
+        borderColor: '#e5e0d8',
       },
       rightPriceScale: {
-        borderColor: '#2B2B2B',
+        borderColor: '#e5e0d8',
       },
     });
 
     const candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#26a69a',
-      downColor: '#ef5350',
+      upColor: '#3a664e', // data-up
+      downColor: '#9c3d38', // data-down
       borderVisible: false,
-      wickUpColor: '#26a69a',
-      wickDownColor: '#ef5350',
+      wickUpColor: '#3a664e',
+      wickDownColor: '#9c3d38',
     });
 
     chartRef.current = chart;
@@ -137,7 +137,7 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     if (displayShowEma !== 'off') {
       const emaData = calculateEma(displayBars, displayShowEma);
       emaSeriesRef.current = chartRef.current.addLineSeries({
-        color: displayShowEma === 10 ? '#2962FF' : '#FF6D00',
+        color: displayShowEma === 10 ? '#2a4365' : '#8c4a32', // primary and signature approx
         lineWidth: 2,
         crosshairMarkerVisible: false,
       });
@@ -149,26 +149,26 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
   }, [displayBars, displayShowEma, displayMarkers, displayTimeframe]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-neutral-900 border border-neutral-800 rounded-lg shadow-md overflow-hidden relative">
-      <div className="flex justify-between items-center p-3 z-10 border-b border-neutral-800 bg-neutral-900/50">
-        <h3 className="text-white font-semibold flex items-baseline gap-2">
+    <div className="flex flex-col h-full w-full bg-surface border border-hairline rounded-lg shadow-card overflow-hidden relative font-sans">
+      <div className="flex justify-between items-center p-3 z-10 border-b border-hairline bg-surface/50">
+        <h3 className="text-ink font-semibold flex items-baseline gap-2">
           {symbol} 
-          <span className="text-xs text-neutral-400 font-normal">({displayTimeframe})</span>
+          <span className="text-xs text-ink-light font-normal">({displayTimeframe})</span>
         </h3>
-        <span className="text-xs text-neutral-400">Data as of last close: {asOfDate}</span>
+        <span className="text-xs text-ink-light">Data as of last close: {asOfDate}</span>
       </div>
-      <div className="relative flex-1 w-full min-h-[300px] p-2 bg-neutral-950">
+      <div className="relative flex-1 w-full min-h-[300px] p-2 bg-surface">
         <div 
           ref={chartContainerRef} 
           className={`absolute inset-0 m-2 signature-transition ${isFading ? 'opacity-0' : 'opacity-100'}`} 
         />
         {bars.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-950 text-neutral-400 text-sm font-sans p-4 text-center z-20">
-            <svg className="w-8 h-8 text-neutral-600 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface text-ink-light text-sm p-4 text-center z-20">
+            <svg className="w-8 h-8 text-ink-light mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span className="font-medium text-neutral-300">No historical price data available for {symbol}</span>
-            <span className="text-xs text-neutral-500 mt-1">Check if API credentials are correct or try seeding the symbol.</span>
+            <span className="font-medium text-ink">No historical price data available for {symbol}</span>
+            <span className="text-xs text-ink-light mt-1">Check if API credentials are correct or try seeding the symbol.</span>
           </div>
         )}
       </div>

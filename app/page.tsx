@@ -6,18 +6,18 @@ export default async function LandingPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col page-reveal font-sans">
+    <div className="min-h-screen bg-paper text-ink flex flex-col page-reveal font-sans">
       {/* Hero Section */}
-      <header className="border-b border-neutral-900 bg-neutral-950/50 backdrop-blur py-6">
+      <header className="border-b border-hairline bg-surface py-6">
         <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 text-white font-bold px-3 py-1.5 rounded-lg text-lg tracking-wider">SB</div>
-            <span className="text-xl font-bold tracking-tight text-white">StockBros</span>
+            <div className="bg-primary text-white font-bold px-3 py-1.5 rounded-lg text-lg tracking-wider font-display">SB</div>
+            <span className="text-xl font-bold tracking-tight text-ink font-display">StockBros</span>
           </div>
           {user && (
             <a 
               href="/dashboard" 
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover transition-colors shadow"
             >
               Go to Dashboard &rarr;
             </a>
@@ -30,62 +30,62 @@ export default async function LandingPage() {
         {/* Left Side: Copy */}
         <div className="lg:col-span-7 space-y-8">
           <div className="space-y-4">
-            <span className="text-blue-500 text-xs font-semibold uppercase tracking-widest bg-blue-950/50 border border-blue-900/50 px-3 py-1.5 rounded-full inline-block">
+            <span className="text-signature text-xs font-semibold uppercase tracking-widest bg-signature/10 border border-signature/20 px-3 py-1.5 rounded-full inline-block">
               EOD Swing Trading Analytics Platform
             </span>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-ink leading-tight font-display">
               Disciplined swing trading, backed by clear analytics.
             </h1>
-            <p className="text-lg text-neutral-400 leading-relaxed max-w-2xl">
+            <p className="text-lg text-ink-light leading-relaxed max-w-2xl font-sans">
               StockBros is designed for systematic swing traders who operate on daily and weekly charts. Log your ideas, screen the market, visualize setups, and measure your edge without noise.
             </p>
           </div>
 
           {/* Core Features */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-neutral-900/40 border border-neutral-800 p-5 rounded-xl space-y-2">
-              <h3 className="font-bold text-white text-base">Multi-Symbol Chart Grid</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">
+            <div className="bg-surface border border-hairline p-5 rounded-xl space-y-2 shadow-card interactive-card">
+              <h3 className="font-bold text-ink text-base">Multi-Symbol Chart Grid</h3>
+              <p className="text-sm text-ink-light leading-relaxed">
                 Render daily and weekly charts with 10/20 EMA technical overlays synced globally.
               </p>
             </div>
-            <div className="bg-neutral-900/40 border border-neutral-800 p-5 rounded-xl space-y-2">
-              <h3 className="font-bold text-white text-base">Rule-Based Screener</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">
+            <div className="bg-surface border border-hairline p-5 rounded-xl space-y-2 shadow-card interactive-card">
+              <h3 className="font-bold text-ink text-base">Rule-Based Screener</h3>
+              <p className="text-sm text-ink-light leading-relaxed">
                 Scan for EMA Stacks, Tight Consolidations, Volume Surges, and Relative Strength.
               </p>
             </div>
-            <div className="bg-neutral-900/40 border border-neutral-800 p-5 rounded-xl space-y-2">
-              <h3 className="font-bold text-white text-base">Watchlist Tagging</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">
+            <div className="bg-surface border border-hairline p-5 rounded-xl space-y-2 shadow-card interactive-card">
+              <h3 className="font-bold text-ink text-base">Watchlist Tagging</h3>
+              <p className="text-sm text-ink-light leading-relaxed">
                 Group candidates by tags (Momentum, Value, Dividend) to monitor development.
               </p>
             </div>
-            <div className="bg-neutral-900/40 border border-neutral-800 p-5 rounded-xl space-y-2">
-              <h3 className="font-bold text-white text-base">Trading Ledger</h3>
-              <p className="text-sm text-neutral-400 leading-relaxed">
+            <div className="bg-surface border border-hairline p-5 rounded-xl space-y-2 shadow-card interactive-card">
+              <h3 className="font-bold text-ink text-base">Trading Ledger</h3>
+              <p className="text-sm text-ink-light leading-relaxed">
                 Log trades, save exit/entry setups, and automatically calculate exact R-multiples.
               </p>
             </div>
           </div>
 
           {/* Scope Limitations */}
-          <div className="bg-amber-950/30 border border-amber-900/30 rounded-xl p-5 space-y-3">
-            <h4 className="text-sm font-semibold text-amber-500 uppercase tracking-wider">
+          <div className="bg-data-down/10 border border-data-down/30 rounded-xl p-5 space-y-3">
+            <h4 className="text-sm font-semibold text-data-down uppercase tracking-wider font-display">
               ⚠️ Platform Disclaimers & Limits (What StockBros Is Not)
             </h4>
-            <ul className="text-xs text-neutral-400 space-y-1.5 list-disc pl-5">
+            <ul className="text-xs text-ink-light space-y-1.5 list-disc pl-5">
               <li>
-                <strong>No Live Trading:</strong> You cannot place orders or execute broker trades directly from the platform.
+                <strong className="text-ink">No Live Trading:</strong> You cannot place orders or execute broker trades directly from the platform.
               </li>
               <li>
-                <strong>End-of-Day (EOD) Data:</strong> All calculations, scans, and chart bars are updated on a daily close-of-market basis.
+                <strong className="text-ink">End-of-Day (EOD) Data:</strong> All calculations, scans, and chart bars are updated on a daily close-of-market basis.
               </li>
               <li>
-                <strong>No Intraday / Real-Time Data:</strong> StockBros is NOT a platform for active day-trading or live market feeds.
+                <strong className="text-ink">No Intraday / Real-Time Data:</strong> StockBros is NOT a platform for active day-trading or live market feeds.
               </li>
               <li>
-                <strong>No Investment Advice:</strong> All metrics are historical mathematical calculations. Users are solely responsible for their trading decisions.
+                <strong className="text-ink">No Investment Advice:</strong> All metrics are historical mathematical calculations. Users are solely responsible for their trading decisions.
               </li>
             </ul>
           </div>
@@ -94,20 +94,20 @@ export default async function LandingPage() {
         {/* Right Side: Auth Form */}
         <div className="lg:col-span-5 w-full max-w-md mx-auto">
           {user ? (
-            <Card className="p-8 bg-neutral-900 border border-neutral-800 text-center space-y-6 rounded-xl shadow-xl">
+            <Card className="p-8 bg-surface border border-hairline text-center space-y-6 rounded-xl shadow-card">
               <div className="space-y-2">
-                <div className="w-12 h-12 bg-blue-900/50 border border-blue-800 text-blue-500 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                <div className="w-12 h-12 bg-primary/20 border border-primary text-primary rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                   ✓
                 </div>
-                <h2 className="text-xl font-bold text-white">Already Signed In</h2>
-                <p className="text-sm text-neutral-400">
-                  Welcome back! You are logged in as <strong className="text-neutral-200">{user.email}</strong>.
+                <h2 className="text-xl font-bold text-ink">Already Signed In</h2>
+                <p className="text-sm text-ink-light">
+                  Welcome back! You are logged in as <strong className="text-ink">{user.email}</strong>.
                 </p>
               </div>
               <div>
                 <a 
                   href="/dashboard" 
-                  className="block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow"
+                  className="block w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover transition-colors shadow"
                 >
                   Go to Dashboard &rarr;
                 </a>
@@ -116,7 +116,7 @@ export default async function LandingPage() {
           ) : (
             <div className="space-y-4">
               <AuthForm />
-              <p className="text-center text-xs text-neutral-500">
+              <p className="text-center text-xs text-ink-light">
                 Register or log in using your email to begin tracking your edge.
               </p>
             </div>
@@ -128,7 +128,7 @@ export default async function LandingPage() {
 }
 
 const Card = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={`bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden ${className}`} {...props}>
+  <div className={`bg-surface border border-hairline rounded-xl shadow-card overflow-hidden ${className}`} {...props}>
     {children}
   </div>
 );

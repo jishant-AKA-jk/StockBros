@@ -144,47 +144,47 @@ export function JournalPage() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto p-6 text-center text-gray-500 font-sans mt-20">
+      <div className="max-w-6xl mx-auto p-6 text-center text-ink-light font-sans mt-20">
         <div className="inline-block text-lg font-medium">Loading trading ledger...</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 bg-gray-50 min-h-screen font-serif page-reveal">
-      <div className="border-b-2 border-gray-900 pb-4">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Trading Ledger</h1>
-        <p className="text-gray-600 italic">Record, measure, and refine your edge.</p>
-        <p className="text-xs text-amber-800 mt-2 font-sans font-medium bg-amber-50 border border-amber-100 p-2.5 rounded">
+    <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-8 bg-paper min-h-screen font-serif page-reveal">
+      <div className="border-b-2 border-primary pb-4">
+        <h1 className="text-3xl font-bold text-ink tracking-tight font-display">Trading Ledger</h1>
+        <p className="text-ink-light italic">Record, measure, and refine your edge.</p>
+        <p className="text-xs text-signature mt-2 font-sans font-medium bg-signature/10 border border-signature/20 p-2.5 rounded">
           * EOD Analytics Tool Disclaimer: StockBros is an end-of-day analytics and journal tool. It is not a live-trading or financial advice platform.
         </p>
       </div>
 
       {/* Stats Panel */}
       <section>
-        <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-gray-800">Performance by Setup</h2>
+        <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-ink font-display">Performance by Setup</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(stats).length === 0 ? (
-             <div className="col-span-full text-sm text-gray-500 italic bg-white p-6 border border-dashed border-gray-300 rounded text-center shadow-sm font-sans">
+             <div className="col-span-full text-sm text-ink-light italic bg-surface p-6 border border-dashed border-hairline rounded text-center shadow-card font-sans">
                No closed trades yet to calculate performance statistics.
              </div>
           ) : Object.entries(stats).map(([tag, data]) => {
             const winRate = ((data.wins / data.trades) * 100).toFixed(1)
             const avgR = (data.totalR / data.trades).toFixed(2)
             return (
-              <Card key={tag} className="p-5 border-t-4 border-t-gray-800 bg-[#fdfdfc] rounded-none shadow-sm">
-                <EyebrowLabel className="mb-1 text-gray-400">{tag.replace('_', ' ')}</EyebrowLabel>
+              <Card key={tag} className="p-5 border-t-4 border-t-primary bg-surface rounded-none shadow-card">
+                <EyebrowLabel className="mb-1 text-ink-light">{tag.replace('_', ' ')}</EyebrowLabel>
                 <div className="flex justify-between items-end mt-4">
                   <div>
-                    <div className="text-sm text-gray-500">Win Rate</div>
-                    <div className="text-2xl font-semibold">{winRate}%</div>
+                    <div className="text-sm text-ink-light">Win Rate</div>
+                    <div className="text-2xl font-semibold text-ink">{winRate}%</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">Avg R</div>
-                    <div className={`text-2xl font-semibold ${Number(avgR) > 0 ? 'text-green-600' : 'text-red-600'}`}>{avgR}R</div>
+                    <div className="text-sm text-ink-light">Avg R</div>
+                    <div className={`text-2xl font-semibold ${Number(avgR) > 0 ? 'text-data-up' : 'text-data-down'}`}>{avgR}R</div>
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 mt-2 text-right">{data.trades} Trades</div>
+                <div className="text-xs text-ink-light mt-2 text-right">{data.trades} Trades</div>
               </Card>
             )
           })}
@@ -192,8 +192,8 @@ export function JournalPage() {
       </section>
 
       {/* Entry Form */}
-      <Card className="p-6 bg-white border-dashed border-2 border-gray-300 rounded-none">
-        <h2 className="text-lg font-bold mb-4 font-sans">New Journal Entry</h2>
+      <Card className="p-6 bg-surface border-dashed border-2 border-hairline rounded-none">
+        <h2 className="text-lg font-bold mb-4 font-sans text-ink">New Journal Entry</h2>
         <form onSubmit={handleAdd} className="space-y-4 font-sans">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
             <div>
@@ -203,7 +203,7 @@ export function JournalPage() {
             <div>
               <EyebrowLabel>Setup</EyebrowLabel>
               <select 
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
+                className="block w-full rounded-md border-hairline shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border bg-surface text-ink"
                 value={setupTag || ''} 
                 onChange={e => setSetupTag(e.target.value as any)}
               >
@@ -229,55 +229,55 @@ export function JournalPage() {
           <div>
             <EyebrowLabel>Notes</EyebrowLabel>
             <textarea 
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border" 
+              className="block w-full rounded-md border-hairline bg-surface text-ink shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-3 border" 
               rows={2}
               value={notes}
               onChange={e => setNotes(e.target.value)}
             />
           </div>
           <div className="flex justify-end">
-            <Button type="submit" className="rounded-none bg-gray-900 hover:bg-gray-800">Log Trade</Button>
+            <Button type="submit" className="rounded-none bg-primary hover:bg-primary-hover text-white">Log Trade</Button>
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-data-down text-sm">{error}</p>}
         </form>
       </Card>
 
       {/* Index Cards for Entries */}
       <section>
-        <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-gray-800">Trade Ledger</h2>
+        <h2 className="text-xl font-bold mb-4 uppercase tracking-widest text-ink font-display">Trade Ledger</h2>
         <div className="grid gap-6 md:grid-cols-2">
           {entries.map(entry => (
-            <Card key={entry.id} className="p-0 flex flex-col bg-[#fffdf0] border border-[#e2d5a3] shadow-sm rounded-none overflow-hidden relative interactive-card">
+            <Card key={entry.id} className="p-0 flex flex-col bg-surface border border-hairline shadow-card rounded-none overflow-hidden relative interactive-card">
               {/* Red line for index card feel */}
-              <div className="absolute left-10 top-0 bottom-0 w-px bg-red-200"></div>
+              <div className="absolute left-10 top-0 bottom-0 w-px bg-data-down/20"></div>
               
               <div className="pl-12 sm:pl-14 p-4 font-sans relative z-10 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-2 border-b border-blue-100 pb-2">
+                <div className="flex justify-between items-start mb-2 border-b border-hairline pb-2">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{entry.symbol}</h3>
-                    <div className="text-xs text-gray-500 mt-1 uppercase">{entry.setup_tag?.replace('_', ' ')}</div>
+                    <h3 className="text-xl font-bold text-ink">{entry.symbol}</h3>
+                    <div className="text-xs text-ink-light mt-1 uppercase">{entry.setup_tag?.replace('_', ' ')}</div>
                   </div>
-                  <Badge variant={entry.r_multiple && entry.r_multiple > 0 ? 'success' : entry.r_multiple && entry.r_multiple <= 0 ? 'danger' : 'default'}>
+                  <Badge variant={entry.r_multiple && entry.r_multiple > 0 ? 'up' : entry.r_multiple && entry.r_multiple <= 0 ? 'down' : 'default'}>
                     {entry.r_multiple !== null ? `${entry.r_multiple.toFixed(2)} R` : 'Open'}
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-2 text-sm text-gray-700 my-2 flex-grow">
+                <div className="grid grid-cols-2 gap-y-2 text-sm text-ink my-2 flex-grow">
                   <div>
-                    <span className="text-gray-400 mr-2">In:</span>
+                    <span className="text-ink-light mr-2">In:</span>
                     {new Date(entry.entry_date).toLocaleDateString()} @ ${entry.entry_price}
                   </div>
                   <div>
-                    <span className="text-gray-400 mr-2">Stop:</span>
+                    <span className="text-ink-light mr-2">Stop:</span>
                     ${entry.initial_stop}
                   </div>
                   {entry.exit_price ? (
                     <div className="col-span-2">
-                      <span className="text-gray-400 mr-2">Out:</span>
+                      <span className="text-ink-light mr-2">Out:</span>
                       {entry.exit_date && new Date(entry.exit_date).toLocaleDateString()} @ ${entry.exit_price}
                     </div>
                   ) : (
-                    <div className="col-span-2 mt-2 pt-2 border-t border-dashed border-gray-300">
+                    <div className="col-span-2 mt-2 pt-2 border-t border-dashed border-hairline">
                       <form 
                         className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full"
                         onSubmit={(e) => {
@@ -288,29 +288,29 @@ export function JournalPage() {
                       >
                         <Input name="exitDate" type="date" required className="h-8 text-xs py-1 w-full sm:w-auto" />
                         <Input name="exitPrice" type="number" step="0.01" placeholder="Exit Price" required className="h-8 text-xs py-1 w-full sm:w-auto" />
-                        <Button type="submit" className="h-8 text-xs py-1 rounded-none whitespace-nowrap bg-gray-700 w-full sm:w-auto">Close Trade</Button>
+                        <Button type="submit" className="h-8 text-xs py-1 rounded-none whitespace-nowrap bg-primary hover:bg-primary-hover w-full sm:w-auto text-white">Close Trade</Button>
                       </form>
                     </div>
                   )}
                 </div>
 
                 {entry.notes && (
-                  <div className="mt-3 text-sm italic text-gray-600 border-t border-gray-200 pt-2 font-serif">
+                  <div className="mt-3 text-sm italic text-ink-light border-t border-hairline pt-2 font-serif">
                     "{entry.notes}"
                   </div>
                 )}
 
                 <div className="mt-4 flex justify-between items-center">
-                  <button onClick={() => toggleChart(entry.id, entry.symbol)} className="text-xs text-blue-500 hover:underline">
+                  <button onClick={() => toggleChart(entry.id, entry.symbol)} className="text-xs text-primary hover:underline">
                     {expandedChart === entry.id ? 'Hide Chart' : 'Show Chart'}
                   </button>
-                  <button onClick={() => handleRemove(entry.id)} className="text-xs text-red-500 hover:underline">
+                  <button onClick={() => handleRemove(entry.id)} className="text-xs text-data-down hover:underline">
                     Delete
                   </button>
                 </div>
 
                 {expandedChart === entry.id && chartData[entry.id] && (
-                  <div className="mt-4 h-64 border-t border-gray-200 pt-4">
+                  <div className="mt-4 h-64 border-t border-hairline pt-4">
                     <PriceChart 
                       symbol={entry.symbol}
                       bars={chartData[entry.id]}
@@ -339,9 +339,9 @@ export function JournalPage() {
             </Card>
           ))}
           {entries.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-12 bg-white border border-dashed border-gray-300 rounded shadow-sm font-sans">
-              <p className="font-semibold text-gray-700">No trades logged in ledger yet.</p>
-              <p className="text-sm text-gray-400 mt-1">Use the entry form above to log your first trade setup and track performance.</p>
+            <div className="col-span-full text-center text-ink-light py-12 bg-surface border border-dashed border-hairline rounded shadow-card font-sans">
+              <p className="font-semibold text-ink">No trades logged in ledger yet.</p>
+              <p className="text-sm text-ink-light mt-1">Use the entry form above to log your first trade setup and track performance.</p>
             </div>
           )}
         </div>

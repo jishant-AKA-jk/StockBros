@@ -71,7 +71,7 @@ async function main() {
     if (existingTickers.has(baseTicker)) {
       rowsToUpsert.push({
         ticker: baseTicker,
-        angel_one_symbol_token: eq.token,
+        dhan_security_id: eq.token,
         exchange_segment: eq.exch_seg,
         name: eq.name
       });
@@ -81,10 +81,10 @@ async function main() {
       // We will insert all NSE equities.
       rowsToUpsert.push({
         ticker: baseTicker,
-        angel_one_symbol_token: eq.token,
+        dhan_security_id: eq.token,
         exchange_segment: eq.exch_seg,
         name: eq.name,
-        // dhan_security_id might be null for new ones
+        // angel_one_symbol_token was a typo, we use dhan_security_id
       });
     }
   }

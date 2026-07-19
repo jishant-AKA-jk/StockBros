@@ -4,9 +4,9 @@ export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttrib
   ({ className = '', variant = 'primary', ...props }, ref) => {
     const baseClass = "px-4 py-2 rounded font-medium text-sm transition-colors";
     const variants = {
-      primary: "bg-blue-600 text-white hover:bg-blue-700",
-      secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
-      danger: "bg-red-600 text-white hover:bg-red-700",
+      primary: "bg-primary text-white hover:bg-primary-hover",
+      secondary: "bg-surface border border-hairline text-ink hover:bg-paper",
+      danger: "bg-data-down text-white opacity-90 hover:opacity-100",
     };
     return <button ref={ref} className={`${baseClass} ${variants[variant]} ${className}`} {...props} />;
   }
@@ -14,17 +14,17 @@ export const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttrib
 Button.displayName = 'Button';
 
 export const Card = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={`bg-white rounded-lg shadow border border-gray-200 overflow-hidden ${className}`} {...props}>
+  <div className={`bg-surface rounded-lg shadow-card border border-hairline overflow-hidden ${className}`} {...props}>
     {children}
   </div>
 );
 
 export const Badge = ({ className = '', children, variant = 'default' }: React.HTMLAttributes<HTMLSpanElement> & { variant?: 'default' | 'success' | 'warning' | 'danger' }) => {
   const variants = {
-    default: "bg-gray-100 text-gray-800",
-    success: "bg-green-100 text-green-800",
-    warning: "bg-yellow-100 text-yellow-800",
-    danger: "bg-red-100 text-red-800",
+    default: "bg-paper border border-hairline text-ink",
+    success: "bg-data-up/10 text-data-up border border-data-up/20",
+    warning: "bg-signature/10 text-signature border border-signature/20",
+    danger: "bg-data-down/10 text-data-down border border-data-down/20",
   };
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
@@ -37,7 +37,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
   ({ className = '', ...props }, ref) => (
     <input
       ref={ref}
-      className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border ${className}`}
+      className={`block w-full rounded-md border-hairline bg-surface text-ink shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border ${className}`}
       {...props}
     />
   )
@@ -45,7 +45,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
 Input.displayName = 'Input';
 
 export const EyebrowLabel = ({ className = '', children, ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
-  <span className={`block text-xs font-semibold text-gray-500 uppercase tracking-wider ${className}`} {...props}>
+  <span className={`block text-xs font-semibold text-ink-light uppercase tracking-wider ${className}`} {...props}>
     {children}
   </span>
 );

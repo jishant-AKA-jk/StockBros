@@ -11,7 +11,7 @@ export interface PriceBar {
 
 export interface Symbol {
   ticker: string;
-  dhanSecurityId: string;
+  angelOneSymbolToken: string;
   exchangeSegment: string;
   name: string;
 }

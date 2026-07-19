@@ -73,7 +73,7 @@ export function WatchlistPage() {
   }, {} as Record<string, WatchlistItem[]>)
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 text-center text-gray-500 font-sans mt-20">
+      <div className="max-w-4xl mx-auto p-6 text-center text-ink-light font-sans mt-20">
         <div className="inline-block text-lg font-medium">Loading watchlist...</div>
       </div>
     );
@@ -82,8 +82,8 @@ export function WatchlistPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8 page-reveal">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Watchlist</h1>
-        <p className="text-gray-500">Track your favorite symbols by tags.</p>
+        <h1 className="text-2xl font-bold text-ink mb-2 font-display">Watchlist</h1>
+        <p className="text-ink-light font-sans">Track your favorite symbols by tags.</p>
       </div>
       <Card className="p-6">
         <form onSubmit={handleAdd} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
@@ -99,7 +99,7 @@ export function WatchlistPage() {
           <div>
             <EyebrowLabel className="mb-2">Tag</EyebrowLabel>
             <select 
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
+              className="block w-full rounded-md border-hairline bg-surface text-ink shadow-sm focus:border-primary focus:ring-primary sm:text-sm px-3 py-2 border"
               value={tag || ''} 
               onChange={e => setTag(e.target.value as any)}
             >
@@ -112,30 +112,30 @@ export function WatchlistPage() {
           </div>
           <Button type="submit" className="w-full">Add to Watchlist</Button>
         </form>
-        {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
+        {error && <p className="text-data-down text-sm mt-4 font-sans">{error}</p>}
       </Card>
 
       <div className="space-y-6">
         {Object.entries(groupedItems).map(([groupTag, groupItems]) => (
           <div key={groupTag}>
-            <h3 className="text-lg font-medium text-gray-900 mb-3 capitalize border-b pb-2">{groupTag}</h3>
+            <h3 className="text-lg font-medium text-ink mb-3 capitalize border-b border-hairline pb-2 font-display">{groupTag}</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {groupItems.map(item => (
-                <Card key={item.id} className="p-4 flex items-center justify-between interactive-card">
+                <Card key={item.id} className="p-4 flex items-center justify-between interactive-card bg-surface">
                   <div>
-                    <div className="font-bold text-gray-900">{item.symbol}</div>
-                    <div className="text-sm text-gray-500">Added {new Date(item.created_at).toLocaleDateString()}</div>
+                    <div className="font-bold text-ink">{item.symbol}</div>
+                    <div className="text-sm text-ink-light font-sans">Added {new Date(item.created_at).toLocaleDateString()}</div>
                   </div>
-                  <Button variant="danger" onClick={() => handleRemove(item.id)}>Remove</Button>
+                  <Button variant="secondary" onClick={() => handleRemove(item.id)}>Remove</Button>
                 </Card>
               ))}
             </div>
           </div>
         ))}
         {items.length === 0 && (
-          <div className="bg-white border border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500 shadow-sm">
-            <p className="font-medium text-gray-700">No symbols in watchlist yet.</p>
-            <p className="text-sm text-gray-400 mt-1">Use the form above to add a symbol (e.g., RELIANCE) to begin tracking.</p>
+          <div className="bg-surface border border-dashed border-hairline rounded-lg p-8 text-center text-ink-light shadow-card font-sans">
+            <p className="font-medium text-ink">No symbols in watchlist yet.</p>
+            <p className="text-sm text-ink-light mt-1">Use the form above to add a symbol (e.g., RELIANCE) to begin tracking.</p>
           </div>
         )}
       </div>

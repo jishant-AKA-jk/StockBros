@@ -22,20 +22,20 @@ export default async function ScreenerPage() {
   if (error || !symbols || symbols.length === 0) {
     return (
       <div className="max-w-4xl mx-auto p-6 md:p-12 space-y-8 page-reveal">
-        <div className="border-b border-gray-200 pb-4">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Screener</h1>
-          <p className="text-gray-500 italic mt-1">StockBros swing trading analytics screener.</p>
+        <div className="border-b border-hairline pb-4">
+          <h1 className="text-3xl font-bold text-ink tracking-tight font-display">Screener</h1>
+          <p className="text-ink-light italic mt-1 font-sans">StockBros swing trading analytics screener.</p>
         </div>
         
-        <div className="bg-white border border-dashed border-gray-300 rounded-lg p-8 md:p-12 text-center space-y-6 shadow-sm">
+        <div className="bg-surface border border-dashed border-hairline rounded-lg p-8 md:p-12 text-center space-y-6 shadow-card">
           <div className="max-w-md mx-auto space-y-3 font-sans">
-            <h2 className="text-xl font-bold text-gray-800">Database is Empty</h2>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <h2 className="text-xl font-bold text-ink">Database is Empty</h2>
+            <p className="text-sm text-ink-light leading-relaxed">
               The symbol database is currently empty. Please run the database seeding script to populate stock symbols.
             </p>
           </div>
           
-          <div className="inline-block bg-gray-50 p-4 border border-gray-200 rounded font-mono text-sm text-gray-700 text-left">
+          <div className="inline-block bg-paper p-4 border border-hairline rounded font-mono text-sm text-ink text-left">
             npm run seed
           </div>
         </div>
