@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo, useMemo } from 'react';
 import { createChart, ColorType, CrosshairMode, IChartApi, ISeriesApi } from 'lightweight-charts';
 import { PriceBar } from '@/lib/types';
-import { calculateEma } from '../utils';
+import { calculateEma, resampleDailyToWeekly } from '../utils';
 
 interface PriceChartProps {
   bars: PriceBar[];
@@ -12,7 +12,7 @@ interface PriceChartProps {
   symbol: string;
 }
 
-export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: PriceChartProps) {
+export const PriceChart = memo(function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -96,16 +96,16 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
 
-    const handleResize = () => {
-      if (chartContainerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
-      }
-    };
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (entries.length === 0 || entries[0].target !== chartContainerRef.current) return;
+      const newRect = entries[0].contentRect;
+      chart.applyOptions({ width: newRect.width, height: newRect.height });
+    });
     
-    window.addEventListener('resize', handleResize);
+    resizeObserver.observe(chartContainerRef.current);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       chart.remove();
     };
   }, []);
@@ -113,7 +113,10 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current || displayBars.length === 0) return;
 
-    const formattedData = displayBars.map(bar => ({
+    // Apply resampling based on displayTimeframe
+    const finalBars = displayTimeframe === '1W' ? resampleDailyToWeekly(displayBars) : displayBars;
+
+    const formattedData = finalBars.map(bar => ({
       time: bar.date,
       open: bar.open,
       high: bar.high,
@@ -135,7 +138,7 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
     }
 
     if (displayShowEma !== 'off') {
-      const emaData = calculateEma(displayBars, displayShowEma);
+      const emaData = calculateEma(finalBars, displayShowEma);
       emaSeriesRef.current = chartRef.current.addLineSeries({
         color: displayShowEma === 10 ? '#2a4365' : '#8c4a32', // primary and signature approx
         lineWidth: 2,
@@ -174,4 +177,4 @@ export function PriceChart({ bars, timeframe, showEma, markers = [], symbol }: P
       </div>
     </div>
   );
-}
+});

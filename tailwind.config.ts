@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,23 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Kraft-paper beige (warm, muted, slightly grayish)
         paper: "var(--color-paper)",
-        // Cleaner off-white for cards
         surface: "var(--color-surface)",
-        // Warm near-black for primary text
         ink: {
           DEFAULT: "var(--color-ink)",
           light: "var(--color-ink-light)",
         },
-        // Deep ink-blue for actionable elements
         primary: {
           DEFAULT: "var(--color-primary)",
           hover: "var(--color-primary-hover)",
         },
-        // Muted burnt-sienna/wax-seal tone for signature moments
         signature: "var(--color-signature)",
-        // Muted data colors for charts/P&L
         data: {
           up: "var(--color-data-up)",
           down: "var(--color-data-down)",

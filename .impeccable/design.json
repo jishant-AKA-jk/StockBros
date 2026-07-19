@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-19T14:18:00+05:30",
+  "title": "Design System: StockBros",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Deep Ink Blue", "canonical": "#1E3A8A", "tonalRamp": ["#172554", "#1E3A8A", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#DBEAFE"] },
+      "signature": { "role": "secondary", "displayName": "Wax Seal Sienna", "canonical": "#A04020", "tonalRamp": ["#451A03", "#78350F", "#92400E", "#A04020", "#B45309", "#D97706", "#F59E0B", "#FBBF24"] },
+      "paper": { "role": "neutral", "displayName": "Kraft Paper", "canonical": "#E6E2D8", "tonalRamp": ["#292524", "#44403C", "#57534E", "#78716C", "#A8A29E", "#D6D3D1", "#E6E2D8", "#F5F5F4"] },
+      "surface": { "role": "neutral", "displayName": "Clean Off-White", "canonical": "#F2EFE9", "tonalRamp": ["#292524", "#44403C", "#57534E", "#78716C", "#A8A29E", "#D6D3D1", "#E7E5E4", "#F2EFE9"] },
+      "ink": { "role": "neutral", "displayName": "Warm Ink", "canonical": "#2A2725", "tonalRamp": ["#1C1917", "#2A2725", "#44403C", "#57534E", "#78716C", "#A8A29E", "#D6D3D1", "#E7E5E4"] },
+      "data-up": { "role": "tertiary", "displayName": "Muted Forest Green", "canonical": "#166534", "tonalRamp": ["#14532D", "#166534", "#15803D", "#16A34A", "#22C55E", "#4ADE80", "#86EFAC", "#BBF7D0"] },
+      "data-down": { "role": "tertiary", "displayName": "Muted Brick Red", "canonical": "#991B1B", "tonalRamp": ["#7F1D1D", "#991B1B", "#B91C1C", "#DC2626", "#EF4444", "#F87171", "#FCA5A5", "#FECACA"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines and wordmarks only. Used with restraint." },
+      "body": { "displayName": "Body", "purpose": "Standard prose, descriptions, and structural UI text." },
+      "label": { "displayName": "Label", "purpose": "Every price, percentage, and numeric table cell. Tabular figures create a precise ledger feel." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "signature-transition", "value": "180ms ease-in-out", "purpose": "Signature transition for chart grid cross-fade." },
+      { "name": "page-reveal", "value": "350ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Single orchestrated page-load reveal." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Used for actionable elements.",
+      "html": "<button class=\"ds-btn-primary\">Run Scan</button>",
+      "css": ".ds-btn-primary { background: #1E3A8A; color: #ffffff; padding: 8px 16px; font-weight: 500; border: none; border-radius: 4px; transition: background 0.2s; } .ds-btn-primary:hover { background: #1E40AF; }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Clean off-white surface for grouping content.",
+      "html": "<div class=\"ds-card\"><h3>Card Title</h3><p>Content goes here.</p></div>",
+      "css": ".ds-card { background: #F2EFE9; border: 1px solid #D6D3D1; border-radius: 4px; padding: 16px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Unified Trading Ledger",
+    "overview": "A tactile, focused, and calm environment designed to bring all essential trading data into one place, saving disciplined traders their most precious resource: time. The aesthetic relies heavily on the physical feel of a field notebook, favoring stark hairlines and restrained whitespace over decorative elements. This system explicitly rejects flashy UI, noisy colors, and generic TradingView-style dark terminal looks.",
+    "keyCharacteristics": [
+      "Time-Saving Focus: No wasted pixels, everything serves the trader's process.",
+      "Ledger Aesthetics: Hairline borders instead of heavy shadows.",
+      "Intentional Restraint: Use of a single bold signature color sparingly."
+    ],
+    "rules": [
+      { "name": "The Signature Restraint Rule", "body": "The signature sienna color is the only bold accent allowed. Use it on ≤5% of the screen. Its rarity is the point.", "section": "colors" },
+      { "name": "The Numeric Precision Rule", "body": "Any data point representing a price, R-multiple, or percentage must use the monospace font to ensure tabular alignment and precision.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are completely flat. Structural hierarchy is achieved purely through hairline borders and background color differences between paper and surface.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do rely on hairline borders and background contrast for layout structure.",
+      "Do use the monospace font for all financial data and metrics.",
+      "Do respect prefers-reduced-motion for all transitions (falling back to instant or simple opacity transitions)."
+    ],
+    "donts": [
+      "Don't use TradingView's dark blue-on-black terminal look.",
+      "Don't use generic AI-default looks (cream+terracotta, neon on black, zero-radius broadsheet).",
+      "Don't use box shadows for elevation. Cards must sit flat on the paper background.",
+      "Don't use particle effects, excessive parallax, animated gradients, or confetti."
+    ]
+  }
+}

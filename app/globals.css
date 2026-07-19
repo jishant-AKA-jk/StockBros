@@ -4,46 +4,40 @@
 
 @layer base {
   :root {
-    /* Background/paper: warm, muted kraft-paper beige (avoiding #F4F1EA) */
-    --color-paper: #E6E2D8;
+    /* Background/paper: Clean modern light */
+    --color-paper: #F8FAFC;
     
-    /* Surface/card: slightly lighter, cleaner off-white */
-    --color-surface: #F2EFE9;
+    /* Surface/card: White */
+    --color-surface: #FFFFFF;
     
-    /* Ink (primary text): warm near-black */
-    --color-ink: #2A2725;
-    --color-ink-light: #595551;
+    /* Ink (primary text): Slate 900 */
+    --color-ink: #0F172A;
+    --color-ink-light: #64748B;
     
-    /* Primary accent: deep ink-blue */
-    --color-primary: #1C355E;
-    --color-primary-hover: #142847;
-    --color-primary: #1E3A8A;
-    --color-primary-hover: #1E40AF;
-    --color-signature: #A04020;
-    --color-data-up: #166534;
-    --color-data-down: #991B1B;
-    --color-hairline: #D6D3D1;
+    /* Primary accent: Techie Blue/Indigo */
+    --color-primary: #4F46E5;
+    --color-primary-hover: #4338CA;
+    --color-signature: #EC4899;
+    --color-data-up: #10B981;
+    --color-data-down: #EF4444;
+    --color-hairline: #E2E8F0;
     --background: var(--color-paper);
     --foreground: var(--color-ink);
   }
 
-  /* Enforce the ledger theme even if OS is in dark mode to preserve the "paper" aesthetic, 
-     or optionally define a distinct dark paper mode. Phase 0.5 said "avoid TradingView's dark blue-on-black terminal look" */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --color-paper: #282624;
-      --color-surface: #363330;
-      --color-ink: #EBE5DF;
-      --color-ink-light: #A39E98;
-      --color-primary: #3B82F6;
-      --color-primary-hover: #60A5FA;
-      --color-signature: #C25E3E;
-      --color-data-up: #22C55E;
-      --color-data-down: #EF4444;
-      --color-hairline: #4F4A45;
-      --background: var(--color-paper);
-      --foreground: var(--color-ink);
-    }
+  .dark {
+    --color-paper: #09090B;
+    --color-surface: #18181B;
+    --color-ink: #FAFAFA;
+    --color-ink-light: #A1A1AA;
+    --color-primary: #6366F1;
+    --color-primary-hover: #818CF8;
+    --color-signature: #F472B6;
+    --color-data-up: #34D399;
+    --color-data-down: #F87171;
+    --color-hairline: #27272A;
+    --background: var(--color-paper);
+    --foreground: var(--color-ink);
   }
 
   body {

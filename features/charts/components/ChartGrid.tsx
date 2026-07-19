@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { PriceChart } from './PriceChart';
-import { resampleDailyToWeekly } from '../utils';
 import { PriceBar } from '@/lib/types';
 
 interface ChartData {
@@ -70,18 +69,15 @@ export function ChartGrid({ charts }: ChartGridProps) {
       
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-        {charts.map((chart) => {
-          const displayBars = timeframe === '1W' ? resampleDailyToWeekly(chart.bars) : chart.bars;
-          return (
-            <PriceChart 
-              key={chart.symbol}
-              symbol={chart.symbol}
-              bars={displayBars}
-              timeframe={timeframe}
-              showEma={ema}
-            />
-          );
-        })}
+        {charts.map((chart) => (
+          <PriceChart 
+            key={chart.symbol}
+            symbol={chart.symbol}
+            bars={chart.bars}
+            timeframe={timeframe}
+            showEma={ema}
+          />
+        ))}
       </div>
     </div>
   );

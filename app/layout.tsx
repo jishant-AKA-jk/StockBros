@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Work_Sans, Bitter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Navbar } from "@/components/Navbar";
 
 // Body face: clean humanist sans
 const workSans = Work_Sans({
@@ -34,35 +36,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${workSans.variable} ${bitter.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased text-ink bg-paper min-h-screen flex flex-col">
-        <nav className="border-b border-hairline bg-surface">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex space-x-8 overflow-x-auto scrollbar-hide py-1">
-                <a href="/" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-ink border-b-2 border-transparent hover:border-hairline whitespace-nowrap">Dashboard</a>
-                <a href="/screener" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-hairline whitespace-nowrap">Screener</a>
-                <a href="/scanner" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-hairline whitespace-nowrap">Scanner</a>
-                <a href="/watchlist" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-hairline whitespace-nowrap">Watchlist</a>
-                <a href="/journal" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-hairline whitespace-nowrap">Journal</a>
-              </div>
+    <html lang="en" className={`${workSans.variable} ${bitter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <body className="font-sans antialiased text-ink bg-paper min-h-screen flex flex-col transition-colors duration-300">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <footer className="border-t border-hairline bg-surface py-6 mt-12 text-center text-sm text-ink-light font-sans">
+            <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <p className="opacity-80">
+                © 2026 StockBros. Built for disciplined trading research.
+              </p>
+              <p className="text-xs max-w-sm text-center sm:text-right">
+                Platform is for historical research only. Not financial advice.
+              </p>
             </div>
-          </div>
-        </nav>
-        <main className="flex-grow">
-          {children}
-        </main>
-        <footer className="border-t border-hairline bg-surface py-8 mt-12 text-center text-xs text-ink-light font-sans">
-          <div className="max-w-4xl mx-auto px-4 space-y-2">
-            <p className="font-semibold text-ink">Disclaimer & Platform Information</p>
-            <p className="leading-relaxed">
-              StockBros is an end-of-day (EOD) swing trading analytics platform. It is <strong>NOT</strong> a live-trading system or financial advice platform. All analytics, calculations, and signals are generated based on historical data.
-            </p>
-            <p className="opacity-80">
-              © 2026 StockBros. Built for disciplined trading research.
-            </p>
-          </div>
-        </footer>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );
