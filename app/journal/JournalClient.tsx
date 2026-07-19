@@ -159,11 +159,9 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
         </div>
         
         <Dialog open={isNewEntryOpen} onOpenChange={setIsNewEntryOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary-hover text-white font-bold shadow-sm flex items-center gap-2">
-              <PlusIcon className="w-5 h-5" />
-              New Entry
-            </Button>
+          <DialogTrigger render={<Button className="bg-primary hover:bg-primary-hover text-white font-bold shadow-sm flex items-center gap-2" />}>
+            <PlusIcon className="w-5 h-5" />
+            New Entry
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] bg-paper border border-hairline p-0 gap-0 overflow-hidden">
             <DialogHeader className="p-6 bg-surface border-b border-hairline">
