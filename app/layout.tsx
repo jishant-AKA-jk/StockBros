@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Work_Sans, Bitter, JetBrains_Mono } from "next/font/google";
+import { Work_Sans, Bitter, JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Navbar } from "@/components/Navbar";
+import { cn } from "@/lib/utils";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 // Body face: clean humanist sans
-const workSans = Work_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 // Display face: characterful slab serif
 const bitter = Bitter({
@@ -36,23 +35,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${workSans.variable} ${bitter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={cn(bitter.variable, jetbrainsMono.variable, "font-sans", inter.variable)} suppressHydrationWarning>
       <body className="font-sans antialiased text-ink bg-paper min-h-screen flex flex-col transition-colors duration-300">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <footer className="border-t border-hairline bg-surface py-6 mt-12 text-center text-sm text-ink-light font-sans">
-            <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="opacity-80">
-                © 2026 StockBros. Built for disciplined trading research.
-              </p>
-              <p className="text-xs max-w-sm text-center sm:text-right">
-                Platform is for historical research only. Not financial advice.
-              </p>
-            </div>
-          </footer>
+          <TooltipProvider>
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <footer className="border-t border-hairline bg-surface py-6 mt-12 text-center text-sm text-ink-light font-sans">
+              <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p className="opacity-80">
+                  © 2026 StockBros. Built for disciplined trading research.
+                </p>
+                <p className="text-xs max-w-sm text-center sm:text-right">
+                  Platform is for historical research only. Not financial advice.
+                </p>
+              </div>
+            </footer>
+          </TooltipProvider>
+          <Toaster position="bottom-right" duration={3000} visibleToasts={1} richColors />
         </ThemeProvider>
       </body>
     </html>

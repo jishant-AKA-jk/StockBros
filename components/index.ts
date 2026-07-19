@@ -3,8 +3,8 @@
 export * from './ui';
 export * from './AuthForm';
 export { Logo } from './Logo';
-export { Button } from "./ui/Button";
+export { Button } from './ui/Button';
 export { Card } from "./ui/Card";
 export { Badge } from "./ui/Badge";
-export { Input } from "./ui/Input";
+export { Input } from './ui/Input';
 export { EyebrowLabel } from "./ui/EyebrowLabel";

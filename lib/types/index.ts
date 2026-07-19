@@ -42,6 +42,8 @@ export interface JournalEntry {
   rMultiple?: number;
 }
 
+export type GridColumns = 2 | 3 | 4 | 5;
+
 // Pagination wrapper
 export interface PaginatedResponse<T> {
   items: T[];
@@ -91,6 +93,13 @@ export interface EMAConfig {
   enabled: boolean;
 }
 
+export interface ChartAnnotation {
+  date: string;
+  price: number;
+  label: string;
+  type: 'entry' | 'exit' | 'signal';
+  color: string;
+}
 // Grid layout option
-export type GridColumns = 2 | 3 | 4 | 5;
+// export type GridColumns = 2 | 3 | 4 | 5;
 
