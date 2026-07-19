@@ -288,8 +288,8 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
                 />
                 
                 {/* Badges - Persistent */}
-                <div className="absolute top-4 left-4 z-20 pointer-events-none flex flex-col gap-2">
-                  <span className="bg-surface/90 backdrop-blur-sm border border-hairline px-2 py-1 rounded text-[10px] font-bold text-ink uppercase tracking-wider shadow-sm">
+                <div className="absolute bottom-4 right-4 z-20 pointer-events-none flex flex-col items-end gap-2">
+                  <span className="bg-surface/95 border border-hairline px-2 py-1 rounded text-[10px] font-bold text-ink uppercase tracking-wider shadow-sm">
                     {entry.setup_tag || 'Untagged'}
                   </span>
                   <Badge variant={entry.r_multiple && entry.r_multiple > 0 ? 'default' : entry.r_multiple !== null && entry.r_multiple <= 0 ? 'destructive' : 'default'} className="shadow-sm">
@@ -298,7 +298,7 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
                 </div>
                 
                 {/* Hover Trade Details Overlay */}
-                <div className="absolute inset-0 bg-paper/95 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-opacity z-10 flex flex-col justify-center p-6 border border-primary/20 rounded-xl shadow-lg">
+                <div className="absolute inset-0 bg-paper/60 backdrop-blur-[3px] opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-30 flex flex-col justify-center p-6 border border-primary/20 rounded-xl shadow-lg">
                   <div className="flex justify-between items-center mb-4 pb-2 border-b border-hairline">
                     <span className="font-bold text-ink text-lg">{entry.symbol}</span>
                     <button 
