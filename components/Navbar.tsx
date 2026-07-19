@@ -4,6 +4,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { Logo } from './Logo'
 import Link from 'next/link'
 import { LogoutButton } from './LogoutButton'
+import { NavLinks } from './NavLinks'
 
 export async function Navbar() {
   const supabase = createClient()
@@ -19,13 +20,7 @@ export async function Navbar() {
             </Link>
 
             {user && (
-              <div className="flex space-x-6 overflow-x-auto scrollbar-hide">
-                <Link href="/dashboard" className="inline-flex items-center pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-primary whitespace-nowrap transition-colors">Dashboard</Link>
-                <Link href="/screener" className="inline-flex items-center pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-primary whitespace-nowrap transition-colors">Screener</Link>
-                <Link href="/scanner" className="inline-flex items-center pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-primary whitespace-nowrap transition-colors">Scanner</Link>
-                <Link href="/watchlist" className="inline-flex items-center pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-primary whitespace-nowrap transition-colors">Watchlist</Link>
-                <Link href="/journal" className="inline-flex items-center pt-1 text-sm font-medium text-ink-light border-b-2 border-transparent hover:text-ink hover:border-primary whitespace-nowrap transition-colors">Journal</Link>
-              </div>
+              <NavLinks />
             )}
           </div>
           
