@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button, Input, EyebrowLabel } from '@/components'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { EyebrowLabel } from '@/components/ui/eyebrow-label'
 import { MiniChart } from '@/features/charts/components'
 import { ChartGrid } from '@/components/ChartGrid'
 import { PriceBar, GridColumns } from '@/lib/types'

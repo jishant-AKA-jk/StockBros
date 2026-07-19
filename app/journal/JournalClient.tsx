@@ -1,7 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Card, Button, Badge, Input, EyebrowLabel } from '@/components'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { EyebrowLabel } from '@/components/ui/eyebrow-label'
 import { MiniChart, PriceChart } from '@/features/charts/components'
 import { ChartGrid } from '@/components/ChartGrid'
 import { PriceBar, GridColumns, EMAConfig, ChartAnnotation } from '@/lib/types'
@@ -15,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
+import { TrashIcon, CheckIcon, PlusIcon } from '@heroicons/react/24/outline'
 
 export type JournalEntryWithBars = {
   id: string;
@@ -155,8 +160,9 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
         
         <Dialog open={isNewEntryOpen} onOpenChange={setIsNewEntryOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary-hover text-white font-bold shadow-sm">
-              + New Entry
+            <Button className="bg-primary hover:bg-primary-hover text-white font-bold shadow-sm flex items-center gap-2">
+              <PlusIcon className="w-5 h-5" />
+              New Entry
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] bg-paper border border-hairline p-0 gap-0 overflow-hidden">
@@ -297,9 +303,10 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
                     <span className="font-bold text-ink text-lg">{entry.symbol}</span>
                     <button 
                       onClick={(e) => handleRemove(e, entry.id)} 
-                      className="text-xs text-data-down hover:underline font-semibold bg-data-down/10 px-2 py-1 rounded"
+                      className="text-xs text-data-down hover:bg-data-down/20 p-1.5 rounded transition-colors"
+                      title="Delete Trade"
                     >
-                      Delete
+                      <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
                   
@@ -338,15 +345,24 @@ export function JournalClient({ initialEntries }: JournalClientProps) {
                           <div className="flex gap-2">
                             <Input name="exitDate" type="date" required className="h-8 text-xs py-1 flex-1 bg-paper" />
                             <Input name="exitPrice" type="number" step="0.01" placeholder="Exit $" required className="h-8 text-xs py-1 flex-1 bg-paper" />
+                            <Button type="submit" className="h-8 w-8 p-0 shrink-0 bg-primary text-white flex items-center justify-center" title="Save Exit">
+                              <CheckIcon className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button type="submit" className="h-8 text-xs py-1 w-full bg-primary text-white">Save Exit</Button>
                         </form>
                       </div>
                     )}
                   </div>
                   
                   {entry.notes && (
-                    <div className="mt-4 pt-3 border-t border-hairline text-xs text-ink-light italic line-clamp-2">
+                    <div 
+                      className="mt-4 pt-3 border-t border-hairline text-xs text-ink-light italic line-clamp-2 cursor-pointer hover:text-primary transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/scanner?symbol=${entry.symbol}&focusTime=${new Date(entry.entry_date).getTime()}`);
+                      }}
+                      title="View on chart"
+                    >
                       "{entry.notes}"
                     </div>
                   )}

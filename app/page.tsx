@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { AuthForm, Logo } from '@/components'
+import { AuthForm } from '@/components/AuthForm';
+import { Logo } from '@/components'
 
 export default async function LandingPage() {
   const supabase = createClient()

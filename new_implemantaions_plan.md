@@ -1057,3 +1057,449 @@ npm install lru-cache
 ---
 
 > **Next Step**: Both teams review this plan, agree on the API interfaces in Section 7, then start with their respective Week 1 tasks. Team A starts with `lib/types/index.ts` updates, Team B starts with `shadcn/ui` installation.
+
+---
+
+## 12. Addendum: Missed Points / Needed Additions & Changes
+*(Based on client feedback)*
+
+### 1. True TradingView Integration
+- **Remove Custom Charts**: Do not just "upgrade" the existing custom canvas chart. Completely replace it with the official **`lightweight-charts`** TradingView library (`npm install lightweight-charts`).
+- **Dashboard Main Chart**: Implement actual TradingView charting for the massive 70% screen chunk to natively support dull grids, combinable EMAs, and high-performance zooming/panning.
+- **Mini-Frames (Screener & Watchlist)**: Strip down the `lightweight-charts` instances (no axes, no grid lines) to create the uniform "trading view frames" for all grid cards. 
+
+### 2. Fully Adjustable Layouts & Grids
+- **Resizable Panels**: Use a proper layout grid (e.g., `react-grid-layout`) or `ResizeObserver`-based flex panels so the TradingView sections and Ledger are entirely adjustable by the user.
+- **Responsive Screen Adjustments**: The row counts for the mini frames MUST respond dynamically to screen sizes (2, 3, 4, or 5 columns) based on user toggles and screen limits.
+
+### 3. Qullamaggie-Style Proprietary Scanner & Algos
+- **Pattern Algorithms**: The scanner must not just run simple EMA rules; it needs fast backend algorithmic detection for Qullamaggie-style setups (Episodic Pivots, High Tight Flags, breakout detection, volume dry-ups).
+- **Historical Event Mapping**: When these algorithms flag a historical match, they must be plotted exactly on the TradingView chart natively via chart markers (arrows/text) at the specific timestamp and price.
+
+### 4. Advanced Multi-Stage Loading
+- Skeletons alone are not enough for the scanner. 
+- Implement a premium, orchestrated loading sequence to avoid any "choppy or crashy" feel:
+  1. *Stage 1*: "Fetching historical data..." (Skeleton frame rendering).
+  2. *Stage 2*: "Running Qullamaggie pattern algorithms..." (Animated scan indicator).
+  3. *Stage 3*: "Plotting events..." (Seamless transition into the interactive TradingView UI).
+
+### 5. Shared Data Caching for Mini-Frames
+- **Fix "Historical Data Not Available"**: Mini TradingView frames must use a shared global data cache (e.g., Zustand or React Query). If data for a ticker was already fetched by the main chart or screener, the mini-frame must use it instantly without re-fetching or failing.
+
+### 6. In-Chart Notes System & Journal
+- **Visual Notes**: User notes must not just be text in a side panel. When a user creates a note for a stock in the Scanner, it should optionally render directly ON the TradingView chart (similar to TradingView's text drawing tool) at the specific date/price.
+- Clicking a journal entry should immediately open the stock chart and jump to that specific note's location on the chart.
+
+### 7. UX, Icons, and Inputs
+- **Heroicons**: Replace all clunky text buttons ("Add to Watchlist", "Remove") with clean **Heroicons** that use hover tooltips. The interface must rely on iconography over big words.
+- **No Alerts**: Strictly ban `window.alert()`. Use Shadcn modals/toasts exclusively.
+- **Date Selection**: Entirely replace HTML date inputs with a robust Shadcn Calendar/Date Picker component for a premium feel.
+
+---
+
+## 13. Phase C: Integration, Testing & Addendum Handshake
+Because Team A and Team B are building in parallel on separate file sets to avoid merge conflicts, a final integration phase is strictly required to tie the full application together.
+
+### C1. API & Global State Wiring
+- Team B must strip out any mocked data used during UI development.
+- Wire the UI exclusively to Team A's endpoints.
+- Establish a **Global Caching Layer** (Zustand or React Query) on the frontend so the Main Chart and Mini-Frames share the identical dataset without re-fetching from the backend.
+
+### C2. The Qullamaggie Data Handshake
+- Team A's Qullamaggie scanner will return raw array data pinpointing exact timestamps and prices for breakout events.
+- Team B must map this backend response perfectly into `lightweight-charts` native markers to visually plot the arrows/flags directly onto the candlesticks.
+
+### C3. End-to-End Testing (Playwright)
+- Utilize the existing `playwright` test setup to run automated E2E tests simulating standard user flows.
+- **Key Flows to Test:**
+  - Filtering stocks via Screener toggles.
+  - Selecting a stock and running a Qullamaggie scan.
+  - Ensuring the sequenced loader (Stage 1 -> Stage 2 -> Stage 3) fires smoothly.
+  - Adding an in-chart note.
+  - Verifying the note appears in the Journal and successfully routes back to the Chart upon clicking.
+
+
+
+
+# StockBros — Section 12 & 13, Revised
+
+This replaces Section 12 (Addendum) and Section 13 (Phase C) in the main
+plan. It keeps every original goal but resolves five real conflicts and
+gaps that would otherwise cause the two teams to build things that don't
+line up, or burn a day discovering a library limitation mid-sprint.
+
+## What changed and why
+
+1. **Item 5's "Zustand or React Query" was left as an open choice.**
+   That's the kind of ambiguity that gets resolved twice, differently, by
+   two teams. Resolved: **React Query (TanStack Query)** for all
+   server-derived data (candles, screener results, scanner results,
+   watchlist, journal) — it deduplicates identical requests by cache key
+   automatically, which is exactly what "mini-frames shouldn't refetch
+   data the main chart already has" needs. Zustand (or plain
+   `useState`/context) stays for genuinely client-only state — selected
+   grid columns, which EMAs are toggled, which stock is highlighted.
+   These solve different problems; using React Query for both eliminates
+   a whole category of manual cache-invalidation bugs.
+
+2. **Item 1 says "the official lightweight-charts TradingView library,"
+   and item 6 asks for TradingView-style text-drawing annotations.**
+   These are not the same product. `lightweight-charts` (free,
+   open-source, npm-installable) supports **series markers** — small
+   shapes (arrow, circle, square) with a short text label, positioned via
+   a separate `createSeriesMarkers()` call in the current major version.
+   It does not support boxed, wrapped, free-text annotations — the
+   library's own maintainers have confirmed this isn't supported when
+   asked directly. That functionality exists only in TradingView's
+   separate, licensed Charting Library product, which item 1 correctly
+   does *not* propose using. **Resolved:** item 3/C2's pattern markers
+   (short-label events) map cleanly to native series markers. Item 6's
+   free-text notes need a custom solution — spec'd below — not a library
+   feature.
+
+3. **Item 2 proposes `react-grid-layout`, which conflicts with Section
+   6's Phase B1/B2, which already chose shadcn's `ResizablePanelGroup`
+   for the dashboard split.** Introducing a second, heavier grid library
+   for what's actually two different problems (a two-pane resizable
+   split vs. a fixed-order card grid with a column-count toggle) is
+   unnecessary. **Resolved:** keep `ResizablePanelGroup` for the
+   chart/ledger split (already decided, don't redo it); use a plain CSS
+   grid with a `columns` state value for the mini-chart grids in
+   screener/watchlist/dashboard — no new dependency needed for that part.
+   Drop `react-grid-layout` from the plan entirely.
+
+4. **Item 3 names "Qullamaggie-style setups" without defining them**,
+   which means two developers implementing "Episodic Pivot" would
+   plausibly write two different things. Concrete definitions below,
+   written to slot into the existing rule-engine pattern from Section 5
+   Phase A3/A4 — extending it, not replacing it. One real structural
+   note: unlike the existing single-bar rules (EMA Stack, Consolidation,
+   Volume Surge), High Tight Flag is a **multi-window** pattern — it
+   can't be evaluated at a single bar in isolation, so its function shape
+   is genuinely different. That's called out explicitly below so nobody
+   tries to force-fit it into the existing `(bars, index) => boolean`
+   signature and gets subtly wrong results.
+
+5. **Addendum item 5 ("shared caching for mini-frames") and Phase C1
+   ("establish a global caching layer on the frontend") describe the
+   same piece of work twice**, once as a Team B addendum task and once
+   as an integration-phase task. Consolidated into one task, owned by
+   Team B, done during the addendum phase — not redone during
+   integration.
+
+---
+
+## Revised Section 12 — Addendum Work
+
+These slot into the existing Team A / Team B task-checklist format
+(Section 5 / Section 6) as new phases, so hour estimates and dependencies
+read the same way as the rest of the plan.
+
+### Team A additions
+
+#### Phase A11: Qullamaggie-Style Pattern Rules (Priority: 🔴 Critical)
+
+**Files to modify:** `features/scanner/rules.ts`, `lib/types/index.ts`
+
+**Rule definitions** (extend the `ScreenerRule` type union with
+`'episodic_pivot' | 'high_tight_flag' | 'volume_dry_up'`):
+
+**Episodic Pivot** — single-bar rule, same shape as existing rules:
+```typescript
+// Large gap on high volume, closing strong — classic EP signature
+function isEpisodicPivot(bars: StockCandle[], i: number): boolean {
+  const gapPct = (bars[i].open - bars[i - 1].close) / bars[i - 1].close;
+  const avgVol20 = averageVolume(bars, i - 20, i - 1);
+  const closedStrong =
+    (bars[i].close - bars[i].low) / (bars[i].high - bars[i].low) >= 0.6;
+  return Math.abs(gapPct) >= 0.10 && bars[i].volume >= 2 * avgVol20 && closedStrong;
+}
+```
+
+**High Tight Flag** — multi-window rule, a genuinely different function
+shape from the rest of the engine. Returns a match object with the
+detected window bounds (needed for chart drawing in C2), not just a
+boolean:
+```typescript
+interface HTFMatch {
+  rallyStartIndex: number;
+  rallyEndIndex: number;
+  rallyGainPct: number;
+  consolidationEndIndex: number;
+  consolidationRangePct: number;
+}
+
+function findHighTightFlag(
+  bars: StockCandle[],
+  i: number,
+  config = { rallyLookback: 40, rallyMinGainPct: 0.9, consolidationWindow: 15, consolidationMaxRangePct: 0.25 }
+): HTFMatch | null {
+  // 1. Find the strongest rally ending at or before i within rallyLookback bars
+  // 2. Require rallyGainPct >= config.rallyMinGainPct
+  // 3. Check the consolidationWindow bars following the rally peak stay within
+  //    consolidationMaxRangePct of the peak price
+  // 4. Require average volume during consolidation < average volume during rally
+  // Return null if any condition fails, otherwise the match with window bounds
+}
+```
+
+**Volume Dry-Up** — standalone single-bar rule, also usable as a
+component check inside High Tight Flag:
+```typescript
+function isVolumeDryUp(bars: StockCandle[], i: number, shortWindow = 10, longWindow = 40): boolean {
+  const recentAvg = averageVolume(bars, i - shortWindow, i);
+  const priorAvg = averageVolume(bars, i - longWindow, i - shortWindow);
+  return recentAvg < 0.5 * priorAvg;
+}
+```
+
+**Breakout detection** (used to flag when a High Tight Flag consolidation
+resolves): close above the highest high of the consolidation window, on
+volume above the recent average.
+
+**Task:** Est. 8h. Depends on A4 (scanner engine) already existing.
+Definition of done: unit tests for all three new rules using hand-built
+fixture data where the correct answer is known by construction — same
+standard as the original screener rules, this is not optional.
+
+#### Phase A12: Scanner Response Shape for Windowed Matches (Priority: 🔴 Critical)
+
+**Files to modify:** `lib/types/index.ts`, `app/api/scanner/route.ts`
+
+The existing `ScanMatch` type (single date + price + description) only
+fits single-bar rules. High Tight Flag matches need a **range**, not a
+point, so the chart can draw the rally and consolidation zones, not just
+a marker. Extend the type rather than force HTF into the existing shape:
+
+```typescript
+export interface ScanMatch {
+  date: string;
+  price: number;
+  description: string;
+  type: 'entry' | 'exit' | 'signal';
+}
+
+// New: for range-based patterns (High Tight Flag)
+export interface ScanRangeMatch {
+  startDate: string;
+  endDate: string;
+  rangeType: 'rally' | 'consolidation';
+  description: string;
+}
+
+export interface ScanResult {
+  symbol: string;
+  name: string;
+  candles: StockCandle[];
+  matches: ScanMatch[];
+  rangeMatches?: ScanRangeMatch[]; // present only for HTF-type results
+  stats: { totalMatches: number; successRate: number; avgReturn: number };
+}
+```
+
+**Task:** Est. 2h. Depends on A11. Team B's C2 work below consumes this
+directly, so this must be agreed and merged before C2 starts.
+
+### Team B additions
+
+#### Phase B14: Shared Chart Component on lightweight-charts v5 (Priority: 🔴 Critical)
+
+**Files to modify:** `features/charts/PriceChart.tsx` (new, replaces the
+internals of both `CandlestickChart.tsx` and `MiniChart.tsx` — both
+become thin wrappers around this one component so there's one place that
+knows the lightweight-charts API, not two).
+
+1. Pin an exact `lightweight-charts` version in `package.json` (not a
+   caret range) — the v4→v5 API change (`addCandlestickSeries()` →
+   `addSeries(CandlestickSeries, options)`, and markers moving to a
+   separate `createSeriesMarkers()` call) means an unpinned auto-upgrade
+   mid-project silently breaks every chart. Confirm the actual installed
+   version via `node_modules/lightweight-charts/package.json` before
+   writing any chart code, don't assume from memory or an old tutorial.
+2. Implement multi-EMA rendering as separate line series added via
+   `addSeries(LineSeries, { color })`, one per enabled EMA — this library
+   doesn't have a single "add these 5 EMAs" call, each is its own series
+   that needs adding/removing as the user toggles EMAs.
+3. Implement pattern markers via `createSeriesMarkers(series, markers)`,
+   not a `.setMarkers()` call on the series itself — that method doesn't
+   exist in this version. Map `ScanMatch` items directly to marker
+   objects (`shape`, `text`, `position`, `color` by match type).
+4. For `ScanRangeMatch` (rally/consolidation zones from High Tight Flag),
+   markers alone don't communicate a range — render a subtle shaded
+   background band for the date range instead (a positioned overlay
+   `<div>`, same technique as B15 below, or a series with area styling
+   spanning that range — pick whichever renders more clearly once you
+   see it against real data).
+
+**Task:** Est. 10h (increased from the original B5+B7's 12h combined
+estimate since this consolidates both charts into one shared component —
+net time is similar or less, but it's now one task instead of two
+independent ones).
+
+#### Phase B15: In-Chart Notes via HTML Overlay (Priority: 🟡 High)
+
+**Files to create:** `features/charts/ChartNoteOverlay.tsx`
+
+Free-text notes cannot use lightweight-charts' marker system (see
+resolution #2 above). Build a positioned HTML overlay instead:
+
+1. Render a `<div>` absolutely positioned over the chart container.
+2. For each note with a `chart_date`/`chart_price`, compute its pixel
+   position using `chart.timeScale().timeToCoordinate(time)` for x and
+   `series.priceToCoordinate(price)` for y.
+3. Re-run that calculation on `chart.timeScale().subscribeVisibleTimeRangeChange()`
+   and on container resize, so notes stay pinned to the correct
+   date/price as the user pans or zooms — this is the part that's easy
+   to get wrong (notes drift out of place on interaction if this isn't
+   wired up).
+4. Render each note as a small clickable icon; clicking opens the note
+   content (a shadcn `Popover` anchored to that icon is a good fit —
+   reuses B1's component set rather than building a new tooltip system).
+5. Handle the case where `timeToCoordinate`/`priceToCoordinate` return
+   `null` (point is currently off-screen) — hide that note's icon rather
+   than rendering it at a wrong position.
+
+**Task:** Est. 6h. Depends on B14.
+
+#### Phase B16: React Query Migration for Data Fetching (Priority: 🔴 Critical)
+
+**Files to modify:** all pages currently using ad hoc `useEffect` + `fetch`
+for candles, screener results, scanner results, watchlist, journal.
+
+1. Install `@tanstack/react-query`, wrap the app in a `QueryClientProvider`
+   in `app/layout.tsx`.
+2. Replace every manual fetch with a `useQuery` call keyed by
+   `['candles', symbol, interval, days]` (and equivalent keys for
+   screener/scanner/watchlist/journal) — this is what makes mini-frames
+   reuse data the main chart already fetched, automatically, with no
+   manual cache object to maintain.
+3. Keep Zustand (or plain state) only for UI-only state: selected grid
+   column count, toggled EMA set, currently-highlighted symbol.
+
+**Task:** Est. 5h. This absorbs and replaces the original addendum item
+5 and Phase C1's "global caching layer" — do not build it twice.
+
+#### Phase B17: Icon & Interaction Consistency Pass (Priority: 🟢 Medium)
+
+shadcn's default components ship with Lucide icons already. Adding
+Heroicons on top means two icon sets rendering side by side, which reads
+as inconsistent rather than premium. **Recommendation: stay on Lucide**
+(already present via shadcn) instead of adding Heroicons as a second
+dependency, unless there's a specific icon Lucide is missing that the
+design actually needs — check before installing a second icon library
+for a handful of icons.
+
+**Task:** Est. 2h (icon audit + swap any inconsistent usages, remove
+Heroicons from Section 9's dependency list if not adopted).
+
+### Updated Team task checklists (append to existing tables)
+
+| # | Task | Team | Est. Hours | Dependencies |
+|---|------|------|------------|--------------|
+| A11 | Qullamaggie pattern rules (EP, HTF, volume dry-up) | A | 8h | A4 |
+| A12 | Extend scan result types for range matches | A | 2h | A11 |
+| B14 | Shared PriceChart on lightweight-charts v5 | B | 10h | B1 |
+| B15 | In-chart notes via HTML overlay | B | 6h | B14 |
+| B16 | React Query migration | B | 5h | B1 |
+| B17 | Icon consistency pass (Lucide vs Heroicons decision) | B | 2h | B1 |
+
+**New running totals:** Team A +10h (44h total), Team B +21h (82h total,
+with B5/B6/B7's original 16h absorbed into B14's 10h — net addendum
+addition to Team B is closer to +15h once you account for that overlap).
+
+---
+
+## Revised Section 13 — Phase C: Integration, Testing & Handshake
+
+This phase is inherently sequential/joint — both teams' file sets
+converge here. Don't start it until every addendum task above and every
+Section 5/6 task is merged into `main`.
+
+### C1. Data Layer Wiring *(joint, ~2h)*
+
+- Confirm Phase B16's React Query migration is fully merged — this *is*
+  the "global caching layer," not a separate thing to build now.
+- Team B removes any remaining mocked data used during addendum UI
+  development, points every `useQuery` at Team A's real endpoints.
+- Smoke-test that a symbol shown on the main dashboard chart, the mini
+  grid, and the screener all resolve to the same React Query cache entry
+  — open React Query Devtools and confirm only one network request fires
+  per symbol per session, not three.
+
+### C2. Qullamaggie Handshake *(joint, ~3h)*
+
+- Team A confirms the `ScanResult` shape (Phase A12) matches what Team
+  B's `PriceChart` (Phase B14) expects — this is the one contract most
+  likely to drift since it was defined across two separate work streams.
+- Wire `matches` → `createSeriesMarkers()` calls and `rangeMatches` → the
+  shaded-band rendering from B14, item 4.
+- Verify visually against at least one real historical High Tight Flag
+  example (pick a known past instance in your Nifty 200 universe) rather
+  than only synthetic test data — pattern-matching logic that looks
+  right in a unit test can still look wrong plotted against real price
+  action, and that's only obvious by eye.
+
+### C3. End-to-End Testing *(joint, ~6h)*
+
+**Test data strategy — decide this before writing tests, not during:**
+Hitting the real Angel One API in every CI run is slow, rate-limited, and
+flaky by nature of depending on an external service. Mock Angel One
+responses at the API route boundary for the Playwright suite (fixture
+data covering a normal case, a High Tight Flag case, and a no-match
+case), and reserve a real-API run for one manual smoke test before each
+release rather than every CI run.
+
+**Key flows to test** (from the original plan, plus one addition):
+- Filtering stocks via Screener toggles, confirming pagination
+  (`offset`/`limit`) behaves correctly across "Load More" clicks.
+- Selecting a stock and running a Qullamaggie scan, confirming both point
+  matches and range matches render.
+- The staged loader (fetch → analyze → plot) — **test via explicit
+  state/`data-testid` assertions on each stage, not via timing/sleep
+  calls.** Asserting "stage 2 element is visible" is reliable; asserting
+  "stage 2 appears after exactly 800ms" is a flaky test waiting to
+  happen, since real network/computation timing varies run to run.
+- Adding an in-chart note (Phase B15), confirming it appears in the
+  Journal, and confirming clicking it from the Journal opens the correct
+  chart at the correct position.
+- Cross-user isolation: a second test account cannot see the first
+  account's watchlist, journal entries, or notes — this should already
+  be covered by RLS, but a dedicated E2E assertion here is cheap
+  insurance given how much has been added since it was last verified.
+
+### C4. Definition of Done for Phase C
+
+- [ ] React Query Devtools confirms no duplicate fetches for the same
+      symbol across main chart, mini-frames, and screener in one session
+- [ ] Every `ScanResult` with `rangeMatches` renders both the point
+      markers and the shaded range correctly on a real historical example
+- [ ] In-chart notes stay correctly positioned through pan/zoom (manually
+      verified, not just unit tested — this is a rendering behavior)
+- [ ] Full Playwright suite passes against mocked Angel One fixtures
+- [ ] One manual smoke test passes against the real Angel One API
+      immediately before release
+- [ ] Zero `window.alert()` calls remain anywhere in the codebase
+      (grep the whole repo, don't rely on memory of what was changed)
+
+---
+
+## Updated Timeline
+
+Add a Week 5 for the addendum + integration work rather than compressing
+it into the original Week 3/4, since this is genuinely additional scope
+beyond the original plan, not a subset of it:
+
+| Team A | Team B |
+|--------|--------|
+| A11: Qullamaggie pattern rules | B14: Shared PriceChart on v5 |
+| A12: Extended scan result types | B15: In-chart notes overlay |
+| (support C2 handshake) | B16: React Query migration |
+| | B17: Icon consistency pass |
+
+### Week 6 — Integration & Release
+| Joint |
+|---|
+| C1: Data layer wiring |
+| C2: Qullamaggie handshake |
+| C3: E2E testing (mocked + one real smoke test) |
+| C4: Definition-of-done checklist, then release |

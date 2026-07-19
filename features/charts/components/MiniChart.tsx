@@ -6,6 +6,8 @@ import { CardSkeleton } from '@/components/Skeletons';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
+import { useMarketDataStore } from '@/lib/store/useMarketDataStore';
+
 interface MiniChartProps {
   symbol: string;
   bars?: PriceBar[];
@@ -15,7 +17,9 @@ interface MiniChartProps {
   onClick?: () => void;
 }
 
-export const MiniChart = memo(function MiniChart({ symbol, bars = [], loading = false, error = false, onRetry, onClick }: MiniChartProps) {
+export const MiniChart = memo(function MiniChart({ symbol, bars: propBars, loading = false, error = false, onRetry, onClick }: MiniChartProps) {
+  const cachedBars = useMarketDataStore(state => state.candles[symbol]);
+  const bars = propBars?.length ? propBars : cachedBars || [];
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);

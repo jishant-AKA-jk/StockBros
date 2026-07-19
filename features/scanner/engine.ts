@@ -2,6 +2,7 @@ import { PriceBar, ScanResult, ScanMatch } from '@/lib/types';
 import { runHistoricalScan, summarizeScan, emaStack, tightConsolidation, volumeSurge } from '../screener/index';
 import { angelOneClient } from '../angelone/angelOneClient';
 import { createClient } from '@/lib/supabase/server';
+import { scanEpisodicPivots, scanHighTightFlags } from './algorithms/qullamaggie';
 
 export async function runScanner(symbol: string, rule: string): Promise<ScanResult> {
   const supabase = createClient();
@@ -35,11 +36,16 @@ export async function runScanner(symbol: string, rule: string): Promise<ScanResu
   
   const summary = summarizeScan(triggers);
   
+  const episodicPivots = scanEpisodicPivots(candles);
+  const highTightFlags = scanHighTightFlags(candles);
+  const chartMarkers = [...episodicPivots, ...highTightFlags];
+  
   return {
     symbol,
     name: symData ? symData.name : symbol,
     candles,
     matches,
+    chartMarkers,
     stats: {
       totalMatches: summary.signalCount,
       successRate: summary.winRate,

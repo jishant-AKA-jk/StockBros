@@ -66,7 +66,7 @@ test.describe('Critical Path', () => {
     
     await page.fill('input[placeholder="e.g. RELIANCE"]', 'AAPL');
     await page.fill('input[type="date"]', '2023-01-01');
-    await page.fill('input[type="number"]').first().fill('150'); // entry price
+    await page.locator('input[type="number"]').first().fill('150'); // entry price
     await page.locator('input[type="number"]').nth(1).fill('140'); // initial stop
     await page.click('button[type="submit"]:has-text("Log Trade")');
 

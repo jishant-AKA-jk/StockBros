@@ -10,9 +10,11 @@ interface PriceChartProps {
   emas?: EMAConfig[];
   annotations?: ChartAnnotation[];
   symbol: string;
+  onAddNote?: (time: string, price: number) => void;
+  focusTime?: string | number;
 }
 
-export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [], annotations = [], symbol }: PriceChartProps) {
+export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [], annotations = [], symbol, onAddNote, focusTime }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -24,6 +26,11 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
   const [displayEmas, setDisplayEmas] = useState<EMAConfig[]>(emas);
   const [displayAnnotations, setDisplayAnnotations] = useState<ChartAnnotation[]>(annotations);
   const [isFading, setIsFading] = useState(false);
+
+  const onAddNoteRef = useRef(onAddNote);
+  useEffect(() => {
+    onAddNoteRef.current = onAddNote;
+  }, [onAddNote]);
 
   // Date formatter for last close date
   const formatDate = (dateStr: string) => {
@@ -112,6 +119,16 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
 
+    const handleDblClick = (param: any) => {
+      if (!param.point || !param.time || !seriesRef.current || !onAddNoteRef.current) return;
+      const price = seriesRef.current.coordinateToPrice(param.point.y);
+      if (price !== null) {
+        const timeStr = typeof param.time === 'object' ? `${param.time.year}-${String(param.time.month).padStart(2, '0')}-${String(param.time.day).padStart(2, '0')}` : param.time.toString();
+        onAddNoteRef.current(timeStr, price);
+      }
+    };
+    chart.subscribeDblClick(handleDblClick);
+
     const resizeObserver = new ResizeObserver((entries) => {
       if (entries.length === 0 || entries[0].target !== chartContainerRef.current) return;
       const newRect = entries[0].contentRect;
@@ -123,6 +140,7 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
     resizeObserver.observe(chartContainerRef.current);
 
     return () => {
+      chart.unsubscribeDblClick(handleDblClick);
       resizeObserver.disconnect();
       chart.remove();
     };
@@ -205,9 +223,24 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
       series.setData(emaData as any);
     });
     
-    chartRef.current.timeScale().fitContent();
+    if (focusTime) {
+      const focusTimestamp = typeof focusTime === 'number' ? focusTime : (Number(focusTime) || new Date(focusTime).getTime());
+      
+      const matchIndex = formattedData.findIndex(b => {
+        const bTime = new Date(b.time as string).getTime();
+        return bTime === focusTimestamp || b.time === focusTime;
+      });
+      
+      if (matchIndex !== -1) {
+        chartRef.current.timeScale().setVisibleLogicalRange({ from: Math.max(0, matchIndex - 30), to: matchIndex + 30 });
+      } else {
+        chartRef.current.timeScale().fitContent();
+      }
+    } else {
+      chartRef.current.timeScale().fitContent();
+    }
 
-  }, [displayBars, displayEmas, displayAnnotations, displayTimeframe]);
+  }, [displayBars, displayEmas, displayAnnotations, displayTimeframe, focusTime]);
 
   return (
     <div className="flex flex-col h-full w-full bg-paper border border-hairline rounded-xl shadow-card overflow-hidden relative font-sans group">

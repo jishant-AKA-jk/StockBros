@@ -11,6 +11,10 @@ import {
   volumeSurge, 
   near52WeekHigh 
 } from '@/features/screener';
+import { useScanner } from '@/features/scanner/useScanner';
+import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ScannerClientProps {
   symbol: string;
@@ -20,6 +24,14 @@ interface ScannerClientProps {
 export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
   const [adding, setAdding] = useState(false);
   const [timeframe, setTimeframe] = useState<'1D' | '1W'>('1D');
+  const { stage, chartMarkers } = useScanner(symbol, initialBars);
+  
+  const mappedAnnotations = chartMarkers ? chartMarkers.map(m => ({
+    date: m.date,
+    label: m.text,
+    type: 'entry' as const,
+    color: m.type === 'EPISODIC_PIVOT' ? '#8b5cf6' : '#ec4899',
+  })) : [];
   
   const [emas, setEmas] = useState<EMAConfig[]>([
     { period: 10, color: '#f59e0b', enabled: true },
@@ -123,9 +135,7 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
               className="flex items-center"
             >
               <div className="relative">
-                <svg className="absolute left-2.5 top-2 h-4 w-4 text-ink-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <MagnifyingGlassIcon className="absolute left-2.5 top-2 h-4 w-4 text-ink-light" />
                 <input 
                   type="text" 
                   name="search" 
@@ -171,31 +181,104 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
             </div>
           </div>
           
-          <Button 
-            onClick={handleAdd} 
-            disabled={adding} 
-            className="bg-primary hover:bg-primary-hover text-white font-semibold shadow-sm"
-          >
-            {adding ? 'Adding...' : '+ Watchlist'}
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  onClick={handleAdd} 
+                  disabled={adding}
+                  size="icon"
+                  variant="outline"
+                  className="bg-surface hover:bg-surface-hover border-hairline text-ink rounded-full shrink-0 shadow-sm transition-all"
+                >
+                  {adding ? (
+                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <PlusIcon className="w-5 h-5" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add {symbol} to Watchlist</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Chart View */}
-        <div className="flex-1 p-2 bg-surface">
-          {initialBars && initialBars.length > 0 ? (
-            <PriceChart 
-              symbol={symbol}
-              bars={initialBars}
-              timeframe={timeframe}
-              emas={emas}
-            />
-          ) : (
+        <div className="flex-1 p-2 bg-surface relative">
+          <style>{`
+            @keyframes scan-line {
+              0% { top: 0%; opacity: 0; }
+              10% { opacity: 1; }
+              90% { opacity: 1; }
+              100% { top: 100%; opacity: 0; }
+            }
+            .animate-scan-line {
+              position: absolute;
+              left: 0;
+              right: 0;
+              height: 2px;
+              background: #3b82f6;
+              box-shadow: 0 0 15px 2px rgba(59, 130, 246, 0.6);
+              animation: scan-line 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+              z-index: 50;
+            }
+            .animate-scan-bg {
+              position: absolute;
+              left: 0;
+              right: 0;
+              height: 120px;
+              background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.1) 80%, rgba(59, 130, 246, 0.4));
+              animation: scan-line 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+              transform: translateY(-100%);
+              z-index: 49;
+            }
+          `}</style>
+          
+          {stage === 'IDLE' && (
             <div className="flex flex-col items-center justify-center h-full text-ink-light border-2 border-dashed border-hairline m-2 rounded-xl bg-surface/50">
               <svg className="w-12 h-12 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="font-semibold text-ink">No Data Found</p>
               <p className="text-sm mt-1">Could not load historical data for {symbol}.</p>
+            </div>
+          )}
+
+          {(stage === 'FETCHING_DATA' || stage === 'RUNNING_ALGOS') && (
+            <div className="relative h-full w-full border border-hairline rounded-xl bg-paper overflow-hidden flex flex-col p-4 gap-4 m-0 shadow-inner">
+               <div className="flex justify-between items-center z-10">
+                 <Skeleton className="h-8 w-48 bg-surface-hover" />
+                 <Skeleton className="h-8 w-24 bg-surface-hover" />
+               </div>
+               <div className="flex-1 flex items-end gap-1.5 z-10 px-2 opacity-50">
+                 {Array.from({ length: 50 }).map((_, i) => {
+                   const h = 20 + Math.abs(Math.sin(i * 0.2) * 50) + Math.random() * 30;
+                   return (
+                     <Skeleton key={i} className="flex-1 bg-ink-light/20 rounded-t-sm" style={{ height: `${h}%` }} />
+                   );
+                 })}
+               </div>
+               
+               {stage === 'RUNNING_ALGOS' && (
+                 <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                   <div className="animate-scan-bg" />
+                   <div className="animate-scan-line" />
+                 </div>
+               )}
+            </div>
+          )}
+
+          {stage === 'PLOTTING' && initialBars && initialBars.length > 0 && (
+            <div className="h-full w-full animate-in fade-in duration-700">
+              <PriceChart 
+                symbol={symbol}
+                bars={initialBars}
+                timeframe={timeframe}
+                emas={emas}
+                annotations={mappedAnnotations}
+              />
             </div>
           )}
         </div>

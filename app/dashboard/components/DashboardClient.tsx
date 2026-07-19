@@ -40,6 +40,7 @@ export function DashboardClient({ charts, ledger }: DashboardClientProps) {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-paper font-sans">
+      {/* @ts-expect-error direction prop is not matching react-resizable-panels type definition */}
       <ResizablePanelGroup direction="horizontal" className="h-[60%] min-h-[400px]">
         {/* Main Chart Panel */}
         <ResizablePanel defaultSize={70} minSize={30}>

@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button, Card, Badge, Input, EyebrowLabel } from "@/components";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { EyebrowLabel } from "@/components/ui/eyebrow-label";
 
 export default function DesignPreviewPage() {
   const [syncToggle, setSyncToggle] = useState(false);
@@ -80,16 +84,16 @@ export default function DesignPreviewPage() {
         <EyebrowLabel>UI Primitives</EyebrowLabel>
         
         <div className="flex flex-wrap gap-4 items-center">
-          <Button variant="primary">Primary Action</Button>
+          <Button variant="default">Primary Action</Button>
           <Button variant="secondary">Secondary Action</Button>
-          <Button variant="signature">Signature Action</Button>
-          <Button variant="primary" disabled>Disabled</Button>
+          <Button variant="default">Signature Action</Button>
+          <Button variant="default" disabled>Disabled</Button>
         </div>
 
         <div className="flex flex-wrap gap-4 items-center">
           <Badge variant="default">Neutral Tag</Badge>
-          <Badge variant="up">+2.4%</Badge>
-          <Badge variant="down">-1.2%</Badge>
+          <Badge variant="default">+2.4%</Badge>
+          <Badge variant="destructive">-1.2%</Badge>
         </div>
 
         <div className="max-w-xs">

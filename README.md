@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <h1>📈 StockBros</h1>
+  <p><strong>Next-Generation Algorithmic Screener & Trading Journal for the NSE</strong></p>
+  <br />
+</div>
 
-## Getting Started
+## 🚀 Overview
 
-First, run the development server:
+**StockBros** is a high-performance, algorithmic stock screener and journaling platform tailored for the Indian Stock Market. Built for speed and accuracy, it features a self-healing historical data cache, real-time pattern detection, and a beautiful, tactile user interface.
 
+## ✨ Key Features
+
+- **🧠 Algorithmic Scanner:** Instantly scan the entire NSE for highly accurate technical patterns (EMA Stacks, Volume Surges, Tight Consolidations).
+- **⚡ Self-Healing Cache:** Lazily fetches and permanently caches historical candle data from AngelOne, eliminating the need for manual maintenance or cron jobs.
+- **📓 Trading Journal:** Log trades, attach visual chart annotations, and track your performance.
+- **⭐ Watchlists:** Create dynamic watchlists powered by lightning-fast data integration.
+- **🎨 Tactile UI:** A premium, modern frontend built with Shadcn/UI, Tailwind, and React Server Components.
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 15 (App Router), React, TailwindCSS, Shadcn/UI
+- **Backend:** Supabase (PostgreSQL), Next.js Server Actions, LRU Cache
+- **Data Provider:** AngelOne API (SmartAPI)
+- **Language:** TypeScript (End-to-End Type Safety)
+
+## 🏎️ Getting Started (Cloud-Only Workflow)
+
+We use a modern, Docker-free "Cloud-Only" workflow for a friction-free developer experience.
+
+### 1. Setup Environment
+Clone the repository and install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure Environment Variables
+Duplicate `.env.local.example` to `.env.local` and fill in your Dev Supabase and AngelOne API keys.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Deploy Dev Database
+Push the schema to your Dev database (No Docker required):
+```bash
+npx supabase db push
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Seed Initial Data
+Populate the database with the NSE master symbol list and dummy data so you can view charts locally:
+```bash
+npm run sync-symbols
+npm run seed
+```
 
-## Learn More
+### 5. Run the App
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the app!
 
-To learn more about Next.js, take a look at the following resources:
+## 🚢 Production Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploying to production is a strict two-step process to ensure data integrity:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Deploy Database:** Link your CLI to your Production Supabase project and run `npx supabase db push`.
+2. **Sync Live Data:** Run `npm run sync-symbols` against the Production DB (⚠️ *Never run `seed` in production*).
+3. **Deploy Frontend:** Push to GitHub to automatically trigger your Vercel deployment.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+<div align="center">
+  <i>Built with precision for the modern trader.</i>
+</div>

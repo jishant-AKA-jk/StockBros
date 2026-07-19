@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { useFormState } from 'react-dom'
-import { Card, Button, Input, EyebrowLabel } from '@/components'
+import { Card } from './ui/card'
+import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { EyebrowLabel } from './ui/eyebrow-label'
 import { loginAction, signUpAction, resetPasswordAction } from '@/app/actions'
 
 const initialState = {

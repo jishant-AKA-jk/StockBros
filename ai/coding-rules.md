@@ -22,3 +22,9 @@ These rules ensure the codebase remains easy to understand, extend, and maintain
 ## 5. Enterprise Scalability
 - **Server Components by Default**: Use Next.js React Server Components (RSC) to reduce the client bundle size. Only add `'use client'` when interactivity (hooks, event listeners, window access, or charting) is strictly required.
 - **Type Safety End-to-End**: Ensure all DB calls and external API calls are strictly typed at the boundary before passing data into components.
+
+## 6. Database Migrations & Supabase Workflow
+- **Always Migrate**: Whenever you need a new table, column, or RLS policy, you MUST create a `.sql` migration file in `supabase/migrations`. Never edit the database directly through the dashboard.
+- **Apply Changes (Cloud Dev / Production)**: To apply your migrations to a live cloud project (like your Dev environment or Production), run: `npx supabase db push`.
+- **Apply Changes (Local Docker)**: To rebuild a local Docker database, run: `npx supabase db reset`.
+- **Post-Deploy Scripts**: After pushing your database to Production or Dev for the first time, run `npm run sync-symbols` to fetch the real stock list. **NEVER run `npm run seed` in Production!**

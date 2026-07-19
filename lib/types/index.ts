@@ -61,12 +61,20 @@ export interface ScanMatch {
   type: 'entry' | 'exit' | 'signal';
 }
 
+export interface ScannerMatch {
+  date: string;
+  price: number;
+  type: 'EPISODIC_PIVOT' | 'HIGH_TIGHT_FLAG' | 'VOLUME_DRY_UP';
+  text: string;
+}
+
 // Scanner result (enhanced)
 export interface ScanResult {
   symbol: string;
   name: string;
   candles: PriceBar[];
   matches: ScanMatch[];
+  chartMarkers?: ScannerMatch[];
   stats: {
     totalMatches: number;
     successRate: number;
