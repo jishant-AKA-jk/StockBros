@@ -120,7 +120,14 @@ export class AngelOneClient {
       body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new AngelOneAuthError(`Login failed (${response.status}): ${text.substring(0, 100)}`);
+    }
+
     if (!response.ok || !data.status) {
       throw new AngelOneAuthError(`Login failed: ${data.message || response.statusText}`);
     }
@@ -193,15 +200,21 @@ export class AngelOneClient {
     }
 
     const contentType = response.headers.get('content-type') || '';
+    const text = await response.text().catch(() => '');
+    
     if (!contentType.includes('application/json')) {
-      const errorText = await response.text().catch(() => '');
-      if (errorText.includes('Access denied')) {
+      if (text.includes('Access denied')) {
         throw new AngelOneRateLimitError('Rate limit exceeded (Access denied)');
       }
-      throw new AngelOneDataError(`API returned non-JSON response: ${errorText.slice(0, 200)}`);
+      throw new AngelOneDataError(`API returned non-JSON response: ${text.slice(0, 200)}`);
     }
 
-    const data = await response.json();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      throw new AngelOneDataError(`API Error (${response.status}): ${text.substring(0, 100)}`);
+    }
     if (!data.status) {
       if (data.message && data.message.includes('Invalid Token')) {
         throw new AngelOneAuthError('Invalid Token');

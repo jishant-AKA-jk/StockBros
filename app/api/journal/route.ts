@@ -14,23 +14,28 @@ const journalSchema = z.object({
 })
 
 export async function GET() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const { data, error } = await supabase
-    .from('journal_entries')
-    .select('*')
-    .order('entry_date', { ascending: false })
+    const { data, error } = await supabase
+      .from('journal_entries')
+      .select('*')
+      .order('entry_date', { ascending: false })
 
-  if (error) {
+    if (error) {
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    return NextResponse.json(data)
+  } catch (err: unknown) {
+    console.error('API Error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  return NextResponse.json(data)
 }
 
 export async function POST(request: Request) {

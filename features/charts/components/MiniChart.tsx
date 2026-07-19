@@ -19,14 +19,14 @@ interface MiniChartProps {
 
 export const MiniChart = memo(function MiniChart({ symbol, bars: propBars, loading = false, error = false, onRetry, onClick }: MiniChartProps) {
   const cachedBars = useMarketDataStore(state => state.candles[symbol]);
-  const bars = propBars?.length ? propBars : cachedBars || [];
+  const bars = Array.isArray(propBars) ? propBars : (Array.isArray(cachedBars) ? cachedBars : []);
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    if (!chartContainerRef.current || loading || error || bars.length === 0) return;
+    if (!chartContainerRef.current || loading || error || !bars || bars.length === 0) return;
 
     const chart = createChart(chartContainerRef.current, {
       layout: {
@@ -73,7 +73,8 @@ export const MiniChart = memo(function MiniChart({ symbol, bars: propBars, loadi
     chartRef.current = chart;
     seriesRef.current = candlestickSeries;
 
-    const formattedData = bars.map(bar => ({
+    const recentBars = bars.slice(-90);
+    const formattedData = recentBars.map(bar => ({
       time: bar.date,
       open: bar.open,
       high: bar.high,

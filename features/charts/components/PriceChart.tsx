@@ -14,14 +14,14 @@ interface PriceChartProps {
   focusTime?: string | number;
 }
 
-export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [], annotations = [], symbol, onAddNote, focusTime }: PriceChartProps) {
+export const PriceChart = memo(function PriceChart({ bars = [], timeframe, emas = [], annotations = [], symbol, onAddNote, focusTime }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
   const emaSeriesRefs = useRef<Map<number, ISeriesApi<'Line'>>>(new Map());
 
   // Decoupled states for smooth cross-fade
-  const [displayBars, setDisplayBars] = useState<PriceBar[]>(bars);
+  const [displayBars, setDisplayBars] = useState<PriceBar[]>(bars || []);
   const [displayTimeframe, setDisplayTimeframe] = useState<'1D' | '1W'>(timeframe);
   const [displayEmas, setDisplayEmas] = useState<EMAConfig[]>(emas);
   const [displayAnnotations, setDisplayAnnotations] = useState<ChartAnnotation[]>(annotations);
@@ -45,7 +45,7 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
     });
   };
 
-  const asOfDate = displayBars.length > 0 ? formatDate(displayBars[displayBars.length - 1].date) : 'N/A';
+  const asOfDate = (displayBars && displayBars.length > 0) ? formatDate(displayBars[displayBars.length - 1].date) : 'N/A';
 
   // Synchronize props to display states with animation delay
   useEffect(() => {
@@ -53,7 +53,7 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
     if (hasChanged) {
       setIsFading(true);
       const timer = setTimeout(() => {
-        setDisplayBars(bars);
+        setDisplayBars(bars || []);
         setDisplayTimeframe(timeframe);
         setDisplayEmas(emas);
         setDisplayAnnotations(annotations);
@@ -62,7 +62,7 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
       return () => clearTimeout(timer);
     } else {
       // Direct updates when timeframe/EMA do not change
-      setDisplayBars(bars);
+      setDisplayBars(bars || []);
       setDisplayAnnotations(annotations);
       setDisplayEmas(emas);
     }
@@ -143,11 +143,12 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
       chart.unsubscribeDblClick(handleDblClick);
       resizeObserver.disconnect();
       chart.remove();
+      emaSeriesRefs.current.clear();
     };
   }, []);
 
   useEffect(() => {
-    if (!seriesRef.current || !chartRef.current || displayBars.length === 0) return;
+    if (!seriesRef.current || !chartRef.current || !displayBars || displayBars.length === 0) return;
 
     // Apply resampling based on displayTimeframe
     const finalBars = displayTimeframe === '1W' ? resampleDailyToWeekly(displayBars) : displayBars;
@@ -269,7 +270,7 @@ export const PriceChart = memo(function PriceChart({ bars, timeframe, emas = [],
           ref={chartContainerRef} 
           className={`absolute inset-0 m-2 transition-opacity duration-300 ${isFading ? 'opacity-0' : 'opacity-100'}`} 
         />
-        {bars.length === 0 && (
+        {(!bars || bars.length === 0) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-paper text-ink-light text-sm p-4 text-center z-20">
             <svg className="w-10 h-10 text-ink-light mb-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />

@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PriceChart } from '@/features/charts/components/PriceChart';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { PriceBar, EMAConfig } from '@/lib/types';
+import { PriceBar, EMAConfig, ChartAnnotation } from '@/lib/types';
 import { 
   emaStack, 
   tightConsolidation, 
   volumeSurge, 
-  near52WeekHigh 
+  near52WeekHigh,
+  runHistoricalScan
 } from '@/features/screener';
 import { useScanner } from '@/features/scanner/useScanner';
 import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -25,13 +26,7 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
   const [adding, setAdding] = useState(false);
   const [timeframe, setTimeframe] = useState<'1D' | '1W'>('1D');
   const { stage, chartMarkers } = useScanner(symbol, initialBars);
-  
-  const mappedAnnotations = chartMarkers ? chartMarkers.map(m => ({
-    date: m.date,
-    label: m.text,
-    type: 'entry' as const,
-    color: m.type === 'EPISODIC_PIVOT' ? '#8b5cf6' : '#ec4899',
-  })) : [];
+  const [activeScan, setActiveScan] = useState<'emaStack' | 'tightConsolidation' | 'volumeSurge' | 'near52WeekHigh' | null>(null);
   
   const [emas, setEmas] = useState<EMAConfig[]>([
     { period: 10, color: '#f59e0b', enabled: true },
@@ -40,6 +35,15 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
     { period: 100, color: '#ec4899', enabled: false },
     { period: 200, color: '#14b8a6', enabled: true },
   ]);
+
+  // When a scan is selected, automatically toggle necessary chart elements
+  useEffect(() => {
+    if (activeScan === 'emaStack') {
+      setEmas(prev => prev.map(e => 
+        (e.period === 10 || e.period === 20) ? { ...e, enabled: true } : e
+      ));
+    }
+  }, [activeScan]);
 
   const toggleEma = (period: number) => {
     setEmas(prev => prev.map(e => e.period === period ? { ...e, enabled: !e.enabled } : e));
@@ -104,6 +108,54 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
     try { matches.volumeSurge = volumeSurge(initialBars, lastIdx); } catch(e) {}
     try { matches.near52WeekHigh = near52WeekHigh(initialBars, lastIdx); } catch(e) {}
   }
+
+  // Dynamically generate annotations based on active scan
+  const dynamicAnnotations = useMemo(() => {
+    if (!activeScan || !initialBars || initialBars.length === 0) return [];
+    
+    let triggers = [];
+    let label = '';
+    let color = '';
+
+    if (activeScan === 'emaStack') {
+      triggers = runHistoricalScan(emaStack, initialBars);
+      label = '10 > 20 EMA';
+      color = '#3b82f6';
+    } else if (activeScan === 'tightConsolidation') {
+      triggers = runHistoricalScan(tightConsolidation as any, initialBars);
+      label = 'Tight Consolidation';
+      color = '#14b8a6';
+    } else if (activeScan === 'volumeSurge') {
+      triggers = runHistoricalScan(volumeSurge as any, initialBars);
+      label = 'Vol Surge';
+      color = '#ec4899';
+    } else if (activeScan === 'near52WeekHigh') {
+      triggers = runHistoricalScan(near52WeekHigh as any, initialBars);
+      label = 'Near 52W High';
+      color = '#8b5cf6';
+    }
+
+    return triggers.map(t => ({
+      date: t.date,
+      label,
+      type: 'entry' as const,
+      color,
+    }));
+  }, [activeScan, initialBars]);
+
+  // Combine algorithmic chartMarkers with interactive dynamic annotations
+  const mappedAnnotations: ChartAnnotation[] = useMemo(() => {
+    // If a user selects a scanner rule, show THAT rule's historical markers.
+    // Otherwise, default to the Qullamaggie algo markers.
+    if (activeScan) return dynamicAnnotations;
+
+    return chartMarkers ? chartMarkers.map(m => ({
+      date: m.date,
+      label: m.text,
+      type: 'entry' as const,
+      color: m.type === 'EPISODIC_PIVOT' ? '#8b5cf6' : '#ec4899',
+    })) : [];
+  }, [activeScan, dynamicAnnotations, chartMarkers]);
 
   const formatNumber = (num: number) => {
     if (num >= 1e7) return (num / 1e7).toFixed(2) + 'Cr';
@@ -314,35 +366,75 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
 
         {/* Scan Details */}
         <div className="p-6 flex-1 bg-surface/30">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-ink-light mb-4">Scan Matches</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-ink-light mb-4 flex items-center justify-between">
+            <span>Scan Matches</span>
+            {activeScan && (
+              <button 
+                onClick={() => setActiveScan(null)}
+                className="text-[10px] text-primary hover:underline lowercase"
+              >
+                Clear Selection
+              </button>
+            )}
+          </h2>
+          <p className="text-xs text-ink-light mb-4">Select a pattern below to instantly highlight it on the chart.</p>
+          
           <div className="space-y-3">
-            <div className={`p-3 rounded-lg border ${matches.emaStack ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-paper border-hairline text-ink-light'}`}>
+            <button 
+              onClick={() => setActiveScan(activeScan === 'emaStack' ? null : 'emaStack')}
+              className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer ${
+                activeScan === 'emaStack' ? 'bg-primary/20 border-primary shadow-[0_0_15px_rgba(59,130,246,0.3)] text-primary ring-1 ring-primary' : 
+                matches.emaStack ? 'bg-primary/5 border-primary/30 text-primary hover:bg-primary/10' : 
+                'bg-paper border-hairline text-ink-light hover:bg-surface'
+              }`}
+            >
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-sm">EMA Stack (10 {'>'} 20)</span>
-                {matches.emaStack && <span className="w-2 h-2 rounded-full bg-primary" />}
+                {matches.emaStack && <span className={`w-2 h-2 rounded-full ${activeScan === 'emaStack' ? 'bg-primary animate-pulse' : 'bg-primary'}`} />}
               </div>
-            </div>
+            </button>
             
-            <div className={`p-3 rounded-lg border ${matches.tightConsolidation ? 'bg-signature/10 border-signature/30 text-signature' : 'bg-paper border-hairline text-ink-light'}`}>
+            <button 
+              onClick={() => setActiveScan(activeScan === 'tightConsolidation' ? null : 'tightConsolidation')}
+              className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer ${
+                activeScan === 'tightConsolidation' ? 'bg-signature/20 border-signature shadow-[0_0_15px_rgba(20,184,166,0.3)] text-signature ring-1 ring-signature' : 
+                matches.tightConsolidation ? 'bg-signature/5 border-signature/30 text-signature hover:bg-signature/10' : 
+                'bg-paper border-hairline text-ink-light hover:bg-surface'
+              }`}
+            >
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-sm">Tight Consolidation</span>
-                {matches.tightConsolidation && <span className="w-2 h-2 rounded-full bg-signature" />}
+                {matches.tightConsolidation && <span className={`w-2 h-2 rounded-full ${activeScan === 'tightConsolidation' ? 'bg-signature animate-pulse' : 'bg-signature'}`} />}
               </div>
-            </div>
+            </button>
             
-            <div className={`p-3 rounded-lg border ${matches.volumeSurge ? 'bg-data-up/10 border-data-up/30 text-data-up' : 'bg-paper border-hairline text-ink-light'}`}>
+            <button 
+              onClick={() => setActiveScan(activeScan === 'volumeSurge' ? null : 'volumeSurge')}
+              className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer ${
+                activeScan === 'volumeSurge' ? 'bg-data-up/20 border-data-up shadow-[0_0_15px_rgba(236,72,153,0.3)] text-data-up ring-1 ring-data-up' : 
+                matches.volumeSurge ? 'bg-data-up/5 border-data-up/30 text-data-up hover:bg-data-up/10' : 
+                'bg-paper border-hairline text-ink-light hover:bg-surface'
+              }`}
+            >
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-sm">Volume Surge (1.5x)</span>
-                {matches.volumeSurge && <span className="w-2 h-2 rounded-full bg-data-up" />}
+                {matches.volumeSurge && <span className={`w-2 h-2 rounded-full ${activeScan === 'volumeSurge' ? 'bg-data-up animate-pulse' : 'bg-data-up'}`} />}
               </div>
-            </div>
+            </button>
 
-            <div className={`p-3 rounded-lg border ${matches.near52WeekHigh ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-paper border-hairline text-ink-light'}`}>
+            <button 
+              onClick={() => setActiveScan(activeScan === 'near52WeekHigh' ? null : 'near52WeekHigh')}
+              className={`w-full text-left p-3 rounded-lg border transition-all cursor-pointer ${
+                activeScan === 'near52WeekHigh' ? 'bg-primary/20 border-primary shadow-[0_0_15px_rgba(139,92,246,0.3)] text-primary ring-1 ring-primary' : 
+                matches.near52WeekHigh ? 'bg-primary/5 border-primary/30 text-primary hover:bg-primary/10' : 
+                'bg-paper border-hairline text-ink-light hover:bg-surface'
+              }`}
+            >
               <div className="flex justify-between items-center">
                 <span className="font-semibold text-sm">Near 52W High (within 5%)</span>
-                {matches.near52WeekHigh && <span className="w-2 h-2 rounded-full bg-primary" />}
+                {matches.near52WeekHigh && <span className={`w-2 h-2 rounded-full ${activeScan === 'near52WeekHigh' ? 'bg-primary animate-pulse' : 'bg-primary'}`} />}
               </div>
-            </div>
+            </button>
           </div>
           
           <p className="text-xs text-ink-light mt-6 italic">

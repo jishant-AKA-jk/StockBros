@@ -3,6 +3,7 @@ import { signOutAction } from '@/app/actions'
 import { ThemeToggle } from './ThemeToggle'
 import { Logo } from './Logo'
 import Link from 'next/link'
+import { LogoutButton } from './LogoutButton'
 
 export async function Navbar() {
   const supabase = createClient()
@@ -32,14 +33,7 @@ export async function Navbar() {
             <ThemeToggle />
             
             {user ? (
-              <form action={signOutAction}>
-                <button 
-                  type="submit"
-                  className="text-sm font-medium text-ink-light hover:text-data-down transition-colors px-3 py-2 rounded-md hover:bg-data-down/10"
-                >
-                  Log out
-                </button>
-              </form>
+              <LogoutButton />
             ) : (
               <Link 
                 href="/"
