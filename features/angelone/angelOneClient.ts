@@ -199,14 +199,22 @@ export class AngelOneClient {
       throw new AngelOneRateLimitError('Rate limit exceeded');
     }
 
-    const text = await response.text();
+    const contentType = response.headers.get('content-type') || '';
+    const text = await response.text().catch(() => '');
+    
+    if (!contentType.includes('application/json')) {
+      if (text.includes('Access denied')) {
+        throw new AngelOneRateLimitError('Rate limit exceeded (Access denied)');
+      }
+      throw new AngelOneDataError(`API returned non-JSON response: ${text.slice(0, 200)}`);
+    }
+
     let data;
     try {
       data = JSON.parse(text);
     } catch (e) {
       throw new AngelOneDataError(`API Error (${response.status}): ${text.substring(0, 100)}`);
     }
-
     if (!data.status) {
       if (data.message && data.message.includes('Invalid Token')) {
         throw new AngelOneAuthError('Invalid Token');
@@ -299,7 +307,8 @@ export class AngelOneClient {
             await this.login();
             retryCount++;
           } else {
-            throw err;
+            console.error(`Error fetching gap for ${symbol}:`, err);
+            break; // Stop retrying on non-auth errors
           }
         }
       }
