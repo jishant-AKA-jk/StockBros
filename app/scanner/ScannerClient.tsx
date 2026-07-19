@@ -113,7 +113,7 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
   const dynamicAnnotations = useMemo(() => {
     if (!activeScan || !initialBars || initialBars.length === 0) return [];
     
-    let triggers = [];
+    let triggers: any[] = [];
     let label = '';
     let color = '';
 
@@ -135,12 +135,16 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
       color = '#8b5cf6';
     }
 
-    return triggers.map(t => ({
-      date: t.date,
-      label,
-      type: 'entry' as const,
-      color,
-    }));
+    return triggers.map(t => {
+      const matchBar = initialBars.find(b => b.date.startsWith(t.date) || t.date.startsWith(b.date));
+      return {
+        date: t.date,
+        price: matchBar ? matchBar.close : 0,
+        label,
+        type: 'entry' as const,
+        color,
+      };
+    });
   }, [activeScan, initialBars]);
 
   // Combine algorithmic chartMarkers with interactive dynamic annotations
@@ -149,12 +153,16 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
     // Otherwise, default to the Qullamaggie algo markers.
     if (activeScan) return dynamicAnnotations;
 
-    return chartMarkers ? chartMarkers.map(m => ({
-      date: m.date,
-      label: m.text,
-      type: 'entry' as const,
-      color: m.type === 'EPISODIC_PIVOT' ? '#8b5cf6' : '#ec4899',
-    })) : [];
+    return chartMarkers ? chartMarkers.map(m => {
+      const matchBar = initialBars.find(b => b.date.startsWith(m.date) || m.date.startsWith(b.date));
+      return {
+        date: m.date,
+        price: matchBar ? matchBar.close : 0,
+        label: m.text,
+        type: 'entry' as const,
+        color: m.type === 'EPISODIC_PIVOT' ? '#8b5cf6' : '#ec4899',
+      };
+    }) : [];
   }, [activeScan, dynamicAnnotations, chartMarkers]);
 
   const formatNumber = (num: number) => {
@@ -235,20 +243,20 @@ export function ScannerClient({ symbol, initialBars }: ScannerClientProps) {
           
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger render={
                 <Button 
                   onClick={handleAdd} 
                   disabled={adding}
                   size="icon"
                   variant="outline"
                   className="bg-surface hover:bg-surface-hover border-hairline text-ink rounded-full shrink-0 shadow-sm transition-all"
-                >
+                />
+              }>
                   {adding ? (
                     <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <PlusIcon className="w-5 h-5" />
                   )}
-                </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Add {symbol} to Watchlist</p>

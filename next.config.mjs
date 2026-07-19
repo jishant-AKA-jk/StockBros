@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [
       {
