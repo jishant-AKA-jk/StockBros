@@ -40,16 +40,20 @@ export function emaStack(bars: PriceBar[], index: number): boolean {
 export function tightConsolidation(bars: PriceBar[], index: number, nDays: number = 5, threshold: number = 0.05): boolean {
   if (!bars || index < nDays - 1 || bars.length <= index) return false;
   
+  let highestHigh = -Infinity;
+  let lowestLow = Infinity;
+  
   for (let i = index - nDays + 1; i <= index; i++) {
     const bar = bars[i];
     if (!bar || bar.close === 0 || isNaN(bar.close) || isNaN(bar.high) || isNaN(bar.low)) return false;
-    const range = bar.high - bar.low;
-    const rangePct = range / bar.close;
-    if (rangePct > threshold) {
-      return false;
-    }
+    if (bar.high > highestHigh) highestHigh = bar.high;
+    if (bar.low < lowestLow) lowestLow = bar.low;
   }
-  return true;
+  
+  if (highestHigh === -Infinity || lowestLow === Infinity || lowestLow === 0) return false;
+  
+  const overallRangePct = (highestHigh - lowestLow) / lowestLow;
+  return overallRangePct <= threshold;
 }
 
 // Rule 3: Volume Surge

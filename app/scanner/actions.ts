@@ -54,7 +54,7 @@ export async function runScannerAction({ ruleId, target }: { ruleId: string, tar
   let benchmarkBars: { date: string, open: number, high: number, low: number, close: number, volume: number }[] = []
   if (ruleId === 'Relative_Strength') {
     const { data } = await supabase
-      .from('price_cache')
+      .from('cached_candles')
       .select('date, open, high, low, close, volume')
       .eq('symbol', 'RELIANCE')
       .gte('date', fromDateStr)
@@ -73,7 +73,7 @@ export async function runScannerAction({ ruleId, target }: { ruleId: string, tar
 
   for (const sym of symbolsToScan) {
     const { data } = await supabase
-      .from('price_cache')
+      .from('cached_candles')
       .select('date, open, high, low, close, volume')
       .eq('symbol', sym)
       .gte('date', fromDateStr)
@@ -108,4 +108,32 @@ export async function runScannerAction({ ruleId, target }: { ruleId: string, tar
 
   const summary = summarizeScan(allTriggers)
   return { summary, triggers: allTriggers.slice(-100) }
+}
+
+export async function getScannerHistory(offset: number = 0, limit: number = 5) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const { data, count, error } = await supabase
+    .from('scanner_history')
+    .select('*', { count: 'exact' })
+    .eq('user_id', user.id)
+    .order('scanned_at', { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (error) throw new Error('Failed to fetch history');
+
+  const total = count || 0;
+
+  return {
+    items: data,
+    total,
+    hasMore: offset + limit < total,
+    offset,
+    limit
+  };
 }

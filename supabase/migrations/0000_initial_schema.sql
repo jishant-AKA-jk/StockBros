@@ -15,7 +15,7 @@ ALTER TABLE symbols ENABLE ROW LEVEL SECURITY;
 
 -- Price Cache Table
 CREATE TABLE price_cache (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     symbol TEXT REFERENCES symbols(ticker) ON DELETE CASCADE,
     date DATE NOT NULL,
     open NUMERIC,
@@ -32,7 +32,7 @@ ALTER TABLE price_cache ENABLE ROW LEVEL SECURITY;
 
 -- Watchlist Items Table
 CREATE TABLE watchlist_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     symbol TEXT REFERENCES symbols(ticker) ON DELETE CASCADE,
     tag TEXT,
@@ -44,7 +44,7 @@ ALTER TABLE watchlist_items ENABLE ROW LEVEL SECURITY;
 
 -- Journal Entries Table
 CREATE TABLE journal_entries (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     symbol TEXT REFERENCES symbols(ticker) ON DELETE CASCADE,
     setup_tag TEXT,
