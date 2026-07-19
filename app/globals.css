@@ -2,27 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Background/paper: warm, muted kraft-paper beige (avoiding #F4F1EA) */
+    --color-paper: #E6E2D8;
+    
+    /* Surface/card: slightly lighter, cleaner off-white */
+    --color-surface: #F2EFE9;
+    
+    /* Ink (primary text): warm near-black */
+    --color-ink: #2A2725;
+    --color-ink-light: #595551;
+    
+    /* Primary accent: deep ink-blue */
+    --color-primary: #1C355E;
+    --color-primary-hover: #142847;
+    
+    /* Signature accent: muted burnt-sienna/wax-seal tone */
+    --color-signature: #A14A38;
+    
+    /* Data colors */
+    --color-data-up: #426B54;
+    --color-data-down: #A54F48;
+
+    /* Hairline borders for ledger feel */
+    --color-hairline: rgba(42, 39, 37, 0.12);
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  /* Signature animation fallback for prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    .signature-transition {
+      transition: opacity 150ms ease-in-out !important;
+      transform: none !important;
+      filter: none !important;
+    }
   }
 }
 
