@@ -9,5 +9,6 @@ For the full, authoritative visual and motion guidelines, please refer to the ro
 ## Quick Reference
 - **Colors**: Kraft-paper beige background (`bg-paper`), deep ink-blue primary accents (`bg-primary`), muted red/green for data. Avoid generic cream or pure black.
 - **Typography**: Work Sans (Body), Bitter (Display), JetBrains Mono (Numeric Data).
-- **Primitives**: Always reuse components from `/components` (Button, Card, Badge, Input, EyebrowLabel). If you need a new element, build it using the established Tailwind tokens and primitives.
+- **Global Layouts**: The core layout structure is defined in `app/layout.tsx` (navigation, footer). Page-specific grids should utilize Tailwind's flex and grid utilities responsively.
+- **Primitives**: Always reuse components from `/components` or `/components/ui` (Button, Card, Badge, Input, EyebrowLabel). If you need a new element, build it using the established Tailwind tokens and primitives. Do not scatter inline arbitrary hex values or custom padding in features.
 - **Tone**: Professional, quiet, and intentional.
