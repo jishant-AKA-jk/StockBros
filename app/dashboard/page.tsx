@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { angelOneClient } from '@/features/angelone/angelOneClient'
-import { ChartGrid } from '@/features/charts/components/ChartGrid'
+import { DashboardClient } from './components/DashboardClient'
 import { DashboardLedger } from './components/DashboardLedger'
 
 export default async function DashboardPage() {
@@ -78,16 +78,9 @@ export default async function DashboardPage() {
   const charts = await Promise.all(chartDataPromises)
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-64px)] w-full overflow-hidden">
-      {/* Left side: Chart Grid (50%) */}
-      <div className="w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden flex flex-col">
-        <ChartGrid charts={charts} />
-      </div>
-      
-      {/* Right side: Trading Ledger (50%) */}
-      <div className="w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden flex flex-col">
-        <DashboardLedger />
-      </div>
-    </div>
+    <DashboardClient 
+      charts={charts}
+      ledger={<DashboardLedger />}
+    />
   )
 }

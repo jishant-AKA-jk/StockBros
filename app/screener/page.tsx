@@ -77,5 +77,5 @@ export default async function ScreenerPage() {
 
   const results = runScreener(rules, universe)
 
-  return <ScreenerClient results={results} lastCloseDate={lastCloseDate} />
+  return <ScreenerClient results={results} universe={universe} lastCloseDate={lastCloseDate} />
 }

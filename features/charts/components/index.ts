@@ -1,2 +1,3 @@
-export { ChartGrid } from './ChartGrid';
+
 export { PriceChart } from './PriceChart';
+export { MiniChart } from './MiniChart';

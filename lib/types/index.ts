@@ -41,3 +41,19 @@ export interface JournalEntry {
   notes?: string;
   rMultiple?: number;
 }
+
+export type GridColumns = 2 | 3 | 4 | 5;
+
+export interface EMAConfig {
+  period: number;
+  color: string;
+  enabled: boolean;
+}
+
+export interface ChartAnnotation {
+  date: string;
+  price: number;
+  label: string;
+  type: 'entry' | 'exit' | 'signal';
+  color: string;
+}
