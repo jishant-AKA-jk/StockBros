@@ -4,6 +4,10 @@ import 'server-only';
 
 import { createClient } from '@supabase/supabase-js';
 import * as OTPAuth from 'otpauth';
+import dns from 'node:dns';
+
+// Fix for Node.js 18+ ENOTFOUND issues on Windows
+dns.setDefaultResultOrder('ipv4first');
 import { PriceBar, Symbol as AppSymbol } from '../../lib/types';
 import {
   AngelOneAuthError,
@@ -83,6 +87,8 @@ export class AngelOneClient {
   private refreshToken: string | null = null;
   private feedToken: string | null = null;
 
+  private loginPromise: Promise<void> | null = null;
+
   private getHeaders(includeAuth = true) {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -101,40 +107,52 @@ export class AngelOneClient {
   }
 
   async login() {
-    if (!API_KEY || !CLIENT_CODE || !PASSWORD || !TOTP_SECRET) {
-      throw new AngelOneAuthError('Missing Angel One credentials in environment variables');
+    if (this.loginPromise) {
+      return this.loginPromise;
     }
 
-    const totpGen = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(TOTP_SECRET) });
-    const totp = totpGen.generate();
+    this.loginPromise = (async () => {
+      try {
+        if (!API_KEY || !CLIENT_CODE || !PASSWORD || !TOTP_SECRET) {
+          throw new AngelOneAuthError('Missing Angel One credentials in environment variables');
+        }
 
-    const payload = {
-      clientcode: CLIENT_CODE,
-      password: PASSWORD,
-      totp: totp,
-    };
+        const totpGen = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(TOTP_SECRET) });
+        const totp = totpGen.generate();
 
-    const response = await fetch('https://apiconnect.angelbroking.com/rest/auth/angelbroking/user/v1/loginByPassword', {
-      method: 'POST',
-      headers: this.getHeaders(false),
-      body: JSON.stringify(payload),
-    });
+        const payload = {
+          clientcode: CLIENT_CODE,
+          password: PASSWORD,
+          totp: totp,
+        };
 
-    const text = await response.text();
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      throw new AngelOneAuthError(`Login failed (${response.status}): ${text.substring(0, 100)}`);
-    }
+        const response = await fetch('https://apiconnect.angelbroking.com/rest/auth/angelbroking/user/v1/loginByPassword', {
+          method: 'POST',
+          headers: this.getHeaders(false),
+          body: JSON.stringify(payload),
+        });
 
-    if (!response.ok || !data.status) {
-      throw new AngelOneAuthError(`Login failed: ${data.message || response.statusText}`);
-    }
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          throw new AngelOneAuthError(`Login failed (${response.status}): ${text.substring(0, 100)}`);
+        }
 
-    this.jwtToken = data.data.jwtToken;
-    this.refreshToken = data.data.refreshToken;
-    this.feedToken = data.data.feedToken;
+        if (!response.ok || !data.status) {
+          throw new AngelOneAuthError(`Login failed: ${data.message || response.statusText}`);
+        }
+
+        this.jwtToken = data.data.jwtToken;
+        this.refreshToken = data.data.refreshToken;
+        this.feedToken = data.data.feedToken;
+      } finally {
+        this.loginPromise = null;
+      }
+    })();
+
+    return this.loginPromise;
   }
 
   async fetchInstrumentsMaster() {
@@ -192,20 +210,18 @@ export class AngelOneClient {
       })
     );
 
-    if (response.status === 401 || response.status === 403) {
-      throw new AngelOneAuthError('Token expired or invalid');
-    }
-    if (response.status === 429) {
-      throw new AngelOneRateLimitError('Rate limit exceeded');
-    }
-
     const contentType = response.headers.get('content-type') || '';
     const text = await response.text().catch(() => '');
     
+    if (response.status === 429 || text.includes('Access denied') || text.includes('exceeding access rate')) {
+      throw new AngelOneRateLimitError('Rate limit exceeded (Access denied)');
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new AngelOneAuthError('Token expired or invalid');
+    }
+
     if (!contentType.includes('application/json')) {
-      if (text.includes('Access denied')) {
-        throw new AngelOneRateLimitError('Rate limit exceeded (Access denied)');
-      }
       throw new AngelOneDataError(`API returned non-JSON response: ${text.slice(0, 200)}`);
     }
 
@@ -295,20 +311,26 @@ export class AngelOneClient {
     for (const range of fetchRanges) {
       let retryCount = 0;
       let newBars: PriceBar[] = [];
+      const maxRetries = 3;
       
-      while (retryCount < 2) {
+      while (retryCount < maxRetries) {
         try {
           if (!this.jwtToken) await this.login();
           newBars = await this.fetchHistoricalFromApi(symbolToken, range.start, range.end);
           break;
-        } catch (err) {
+        } catch (err: any) {
           if (err instanceof AngelOneAuthError) {
-            console.log('Token expired, re-authenticating...');
+            console.log(`Token expired, re-authenticating for ${symbol}...`);
             await this.login();
             retryCount++;
+          } else if (err instanceof TypeError || (err.cause && err.cause.code)) {
+            // Network error (e.g. fetch failed, ENOTFOUND, ECONNRESET)
+            retryCount++;
+            console.log(`Network error fetching gap for ${symbol}, retrying (${retryCount}/${maxRetries})...`, err.message || err);
+            await new Promise(r => setTimeout(r, 1000 * retryCount)); // Exponential backoff
           } else {
             console.error(`Error fetching gap for ${symbol}:`, err);
-            break; // Stop retrying on non-auth errors
+            break; // Stop retrying on other errors (like data error or rate limit if we don't want to backoff)
           }
         }
       }

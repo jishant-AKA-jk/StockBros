@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { MiniChart } from '@/features/charts/components';
 import { ChartGrid } from '@/components/ChartGrid';
@@ -23,6 +24,27 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
   const safeUniverse = universe || [];
   const ruleIds = Object.keys(safeResults);
   const [activeRules, setActiveRules] = useState<string[]>([ruleIds[0] || '']);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const router = useRouter();
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    toast.info('Syncing market data. This usually takes around 60 seconds...');
+    try {
+      const res = await fetch('/api/screener/sync', { method: 'POST' });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to sync data');
+      }
+      toast.success('Market data synced successfully!');
+      router.refresh();
+    } catch (e: any) {
+      toast.error(e.message || 'Error syncing data');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const [gridColumns, setGridColumns] = useState<GridColumns>(4);
   const [adding, setAdding] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(12);
@@ -139,9 +161,19 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
           </div>
           
           <div className="mt-8 pt-4 border-t border-hairline">
-             <Button className="w-full bg-primary hover:bg-primary-hover text-white shadow-sm font-semibold">
-                Run Screener
+             <Button 
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="w-full bg-primary hover:bg-primary-hover text-white shadow-sm font-semibold flex items-center justify-center gap-2"
+             >
+                {isSyncing ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Syncing... (~1 min)
+                  </>
+                ) : 'Sync Latest Data'}
              </Button>
+             <p className="text-[10px] text-ink-light text-center mt-2 leading-tight">Downloads missing daily candles from AngelOne.</p>
           </div>
         </div>
 

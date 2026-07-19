@@ -47,17 +47,37 @@ export default async function ScreenerPage() {
   const fromDate = new Date()
   fromDate.setFullYear(fromDate.getFullYear() - 1) // 1 year lookback
 
-  const universePromises = symbols.map(async (s) => {
-    // Only fetch from cache if possible. getHistoricalDaily handles it.
-    try {
-      const bars = await angelOneClient.getHistoricalDaily(s.ticker, fromDate, toDate)
-      return { symbol: s.ticker, bars }
-    } catch {
-      return { symbol: s.ticker, bars: [] }
-    }
-  })
+  const fromStr = `${fromDate.getFullYear()}-${(fromDate.getMonth()+1).toString().padStart(2, '0')}-${fromDate.getDate().toString().padStart(2, '0')}`;
+  const symbolNames = symbols.map(s => s.ticker);
 
-  const universe = await Promise.all(universePromises)
+  // OPTIMIZATION: Fetch all candles in a single bulk query instead of 150 individual queries
+  // This makes the screener load instantly and prevents the navbar/website from freezing
+  const { data: allCandles } = await supabase
+    .from('cached_candles')
+    .select('symbol, date, open, high, low, close, volume')
+    .in('symbol', symbolNames)
+    .gte('date', fromStr)
+    .order('date', { ascending: true });
+
+  const groupedBars: Record<string, any[]> = {};
+  if (allCandles) {
+    for (const row of allCandles) {
+      if (!groupedBars[row.symbol]) groupedBars[row.symbol] = [];
+      groupedBars[row.symbol].push({
+        date: row.date,
+        open: Number(row.open),
+        high: Number(row.high),
+        low: Number(row.low),
+        close: Number(row.close),
+        volume: Number(row.volume),
+      });
+    }
+  }
+
+  const universe = symbols.map(s => ({
+    symbol: s.ticker,
+    bars: groupedBars[s.ticker] || []
+  }));
 
   // Find the latest close date in the universe
   const lastCloseDate = universe.find(u => u.bars.length > 0)?.bars.slice(-1)[0]?.date || 'N/A';
