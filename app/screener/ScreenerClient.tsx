@@ -19,10 +19,13 @@ interface ScreenerClientProps {
 }
 
 export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerClientProps) {
-  const ruleIds = Object.keys(results);
+  const safeResults = results || {};
+  const safeUniverse = universe || [];
+  const ruleIds = Object.keys(safeResults);
   const [activeRules, setActiveRules] = useState<string[]>([ruleIds[0] || '']);
   const [gridColumns, setGridColumns] = useState<GridColumns>(4);
   const [adding, setAdding] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(12);
 
   const handleAdd = async (e: React.MouseEvent, symbol: string) => {
     e.stopPropagation(); // Prevent chart click
@@ -45,22 +48,16 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
   };
 
   const toggleRule = (rule: string) => {
-    setActiveRules(prev => {
-      if (prev.includes(rule)) {
-        // Prevent deselecting the last rule
-        if (prev.length === 1) return prev;
-        return prev.filter(r => r !== rule);
-      }
-      return [...prev, rule];
-    });
+    setActiveRules([rule]);
+    setDisplayCount(12);
   };
 
-  const activeSymbols = activeRules.length > 0
-    ? activeRules.reduce((acc, rule) => acc.filter(sym => results[rule].includes(sym)), results[activeRules[0]])
+  const activeSymbols = (activeRules || []).length > 0
+    ? activeRules.reduce((acc, rule) => acc.filter(sym => (safeResults[rule] || []).includes(sym)), safeResults[activeRules[0]] || [])
     : [];
 
-  const gridItems = activeSymbols.map(sym => {
-    const data = universe.find(u => u.symbol === sym);
+  const gridItems = (activeSymbols || []).slice(0, displayCount).map(sym => {
+    const data = safeUniverse.find(u => u.symbol === sym);
     return data || { symbol: sym, bars: [] };
   });
 
@@ -95,12 +92,26 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
       </div>
 
       <div className="flex flex-1 overflow-hidden">
+        {ruleIds.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border-2 border-dashed border-hairline rounded-2xl m-6 shadow-sm text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-ink mb-2 font-display">No Screener Data</h2>
+            <p className="text-ink-light max-w-md">
+              We couldn't load the screening results or your data source returned empty. Please check your connection or try again later.
+            </p>
+          </div>
+        ) : (
+          <>
         {/* Left Sidebar: Rules */}
         <div className="w-64 border-r border-hairline bg-surface/50 overflow-y-auto shrink-0 flex flex-col p-4">
           <h3 className="text-xs font-bold uppercase tracking-widest text-ink-light mb-4">Scan Strategies</h3>
           <div className="space-y-2">
-            {ruleIds.map(rule => {
-              const isActive = activeRules.includes(rule);
+            {(ruleIds || []).map(rule => {
+              const isActive = (activeRules || []).includes(rule);
               return (
                 <button
                   key={rule}
@@ -120,7 +131,7 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
                     "text-xs font-mono px-2 py-0.5 rounded-full border",
                     isActive ? "bg-primary/20 border-primary/30" : "bg-surface border-hairline"
                   )}>
-                    {results[rule].length}
+                    {(safeResults[rule] || []).length}
                   </span>
                 </button>
               )
@@ -138,14 +149,14 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
         <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-surface/20">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-bold text-ink capitalize font-display flex items-center gap-2">
-              {activeRules.length > 1 ? 'Combined Strategy' : activeRules[0]?.replace(/_/g, ' ')} Matches
+              {(activeRules || []).length > 1 ? 'Combined Strategy' : (activeRules || [])[0]?.replace(/_/g, ' ')} Matches
               <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full font-mono ml-2">
-                {gridItems.length}
+                {(activeSymbols || []).length}
               </span>
             </h2>
           </div>
 
-          {gridItems.length === 0 ? (
+          {(!activeSymbols || activeSymbols.length === 0) ? (
             <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-hairline rounded-xl bg-surface/50 text-ink-light shadow-inner">
               <svg className="w-12 h-12 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -154,35 +165,50 @@ export function ScreenerClient({ results, universe, lastCloseDate }: ScreenerCli
               <p className="text-sm mt-1">Try another strategy or expand your universe.</p>
             </div>
           ) : (
-            <ChartGrid 
-              items={gridItems}
-              columns={gridColumns}
-              onColumnsChange={setGridColumns}
-              total={gridItems.length}
-              renderCard={(item) => (
-                <div className="relative group/card">
-                  <MiniChart 
-                    symbol={item.symbol}
-                    bars={item.bars}
-                    loading={false}
-                    error={false}
-                  />
-                  <div className="absolute bottom-4 left-4 right-4 z-20 flex justify-end opacity-0 group-hover/card:opacity-100 transition-opacity">
-                    <Button 
-                      size="sm" 
-                      variant="secondary" 
-                      className="text-xs shadow-md border border-hairline bg-paper hover:bg-surface text-ink"
-                      disabled={adding === item.symbol}
-                      onClick={(e) => handleAdd(e, item.symbol)}
-                    >
-                      {adding === item.symbol ? 'Adding...' : '+ Watchlist'}
-                    </Button>
+            <div className="flex flex-col gap-6">
+              <ChartGrid 
+                items={gridItems}
+                columns={gridColumns}
+                onColumnsChange={setGridColumns}
+                total={activeSymbols?.length || 0}
+                renderCard={(item) => (
+                  <div className="relative group/card">
+                    <MiniChart 
+                      symbol={item.symbol}
+                      bars={item.bars}
+                      loading={false}
+                      error={false}
+                    />
+                    <div className="absolute bottom-4 left-4 right-4 z-20 flex justify-end opacity-0 group-hover/card:opacity-100 transition-opacity">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="text-xs shadow-md border border-hairline bg-paper hover:bg-surface text-ink"
+                        disabled={adding === item.symbol}
+                        onClick={(e) => handleAdd(e, item.symbol)}
+                      >
+                        {adding === item.symbol ? 'Adding...' : '+ Watchlist'}
+                      </Button>
+                    </div>
                   </div>
+                )}
+              />
+              {displayCount < (activeSymbols?.length || 0) && (
+                <div className="flex justify-center pb-8">
+                  <Button 
+                    onClick={() => setDisplayCount(prev => prev + 12)}
+                    variant="outline"
+                    className="bg-paper hover:bg-surface text-ink border-hairline"
+                  >
+                    Load More
+                  </Button>
                 </div>
               )}
-            />
+            </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { EyebrowLabel } from '@/components/ui/eyebrow-label'
@@ -32,6 +32,39 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
   const [activeTab, setActiveTab] = useState<string>('all')
   const [gridColumns, setGridColumns] = useState<GridColumns>(4)
   const [removing, setRemoving] = useState<string | null>(null)
+  
+  const [searchResults, setSearchResults] = useState<{ticker: string, name: string}[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!symbol || !showDropdown) {
+      setSearchResults([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/symbols/search?q=${encodeURIComponent(symbol)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSearchResults(data)
+        }
+      } catch (err) {
+        // ignore
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [symbol, showDropdown])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,13 +101,14 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
     }
   }
 
+  const safeItems = initialItems || [];
   // Extract unique tags for tabs
-  const uniqueTags = Array.from(new Set(initialItems.map(i => i.tag || 'untagged')))
+  const uniqueTags = Array.from(new Set(safeItems.map(i => i.tag || 'untagged')))
   const tabs = ['all', ...uniqueTags]
 
   const filteredItems = activeTab === 'all' 
-    ? initialItems 
-    : initialItems.filter(i => (i.tag || 'untagged') === activeTab)
+    ? safeItems 
+    : safeItems.filter(i => (i.tag || 'untagged') === activeTab)
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-8 page-reveal min-h-screen bg-paper font-sans">
@@ -85,13 +119,40 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
         </div>
 
         <form onSubmit={handleAdd} className="flex gap-2 w-full md:w-auto">
-          <Input 
-            value={symbol} 
-            onChange={e => setSymbol(e.target.value)} 
-            placeholder="Symbol (e.g. RELIANCE)"
-            required 
-            className="w-full md:w-48 bg-surface"
-          />
+          <div className="relative w-full md:w-48" ref={dropdownRef}>
+            <Input 
+              value={symbol} 
+              onChange={e => {
+                setSymbol(e.target.value)
+                setShowDropdown(true)
+              }}
+              onFocus={() => {
+                if (symbol) setShowDropdown(true)
+              }}
+              placeholder="Symbol (e.g. RELIANCE)"
+              required 
+              className="w-full bg-surface"
+              autoComplete="off"
+            />
+            {showDropdown && searchResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 mt-1 w-64 bg-surface border border-hairline rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                {(searchResults || []).map((item) => (
+                  <button
+                    key={item.ticker}
+                    type="button"
+                    className="w-full text-left px-3 py-2 hover:bg-hairline text-sm text-ink focus:outline-none focus:bg-hairline"
+                    onClick={() => {
+                      setSymbol(item.ticker)
+                      setShowDropdown(false)
+                    }}
+                  >
+                    <div className="font-semibold">{item.ticker}</div>
+                    <div className="text-xs text-ink-light truncate">{item.name}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <select 
             className="rounded-md border border-hairline bg-surface text-ink focus:border-primary focus:ring-primary sm:text-sm px-3 py-2"
             value={tag} 
@@ -107,7 +168,7 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
         </form>
       </div>
 
-      {initialItems.length === 0 ? (
+      {safeItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-12 text-center bg-surface border border-dashed border-hairline rounded-xl shadow-inner mt-8">
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +190,7 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
         <div className="space-y-6">
           {/* Tabs */}
           <div className="flex flex-wrap gap-2">
-            {tabs.map(t => (
+            {(tabs || []).map(t => (
               <button
                 key={t}
                 onClick={() => setActiveTab(t)}
@@ -142,7 +203,7 @@ export function WatchlistClient({ initialItems }: WatchlistClientProps) {
               >
                 {t.replace(/_/g, ' ')}
                 <span className="ml-2 opacity-50 text-xs">
-                  {t === 'all' ? initialItems.length : initialItems.filter(i => (i.tag || 'untagged') === t).length}
+                  {t === 'all' ? safeItems.length : safeItems.filter(i => (i.tag || 'untagged') === t).length}
                 </span>
               </button>
             ))}

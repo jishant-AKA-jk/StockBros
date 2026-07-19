@@ -110,7 +110,7 @@ export default function DesignPreviewPage() {
               Click the global sync toggle to trigger the synchronized cross-fade transition.
             </p>
           </div>
-          <Button variant="signature" onClick={handleToggle}>
+          <Button variant="default" onClick={handleToggle}>
             Toggle Global Sync
           </Button>
         </div>
@@ -120,7 +120,7 @@ export default function DesignPreviewPage() {
           <Card>
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-hairline">
               <span className="font-display font-semibold text-lg">AAPL</span>
-              <Badge variant={syncToggle ? "up" : "down"}>
+              <Badge variant="secondary" className={syncToggle ? "bg-data-up/20 text-data-up" : "bg-data-down/20 text-data-down"}>
                 {syncToggle ? "+1.2%" : "-0.4%"}
               </Badge>
             </div>
@@ -138,7 +138,7 @@ export default function DesignPreviewPage() {
           <Card>
             <div className="flex justify-between items-center mb-4 pb-2 border-b border-hairline">
               <span className="font-display font-semibold text-lg">MSFT</span>
-              <Badge variant={syncToggle ? "up" : "down"}>
+              <Badge variant="secondary" className={syncToggle ? "bg-data-up/20 text-data-up" : "bg-data-down/20 text-data-down"}>
                 {syncToggle ? "+0.8%" : "-1.1%"}
               </Badge>
             </div>

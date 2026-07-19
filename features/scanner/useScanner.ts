@@ -25,13 +25,16 @@ export function useScanner(symbol: string, initialBars: PriceBar[]) {
 
       setStage('RUNNING_ALGOS');
       try {
-        const res = await fetch(`/api/scanner?symbol=${symbol}&rule=ema_stack`);
-        const data = await res.json();
-        if (data.chartMarkers && isMounted) {
-          setChartMarkers(data.chartMarkers);
+        // Run algos locally to prevent dual-fetching from AngelOne and crashing
+        const { scanEpisodicPivots, scanHighTightFlags } = await import('@/features/scanner/algorithms/qullamaggie');
+        const episodicPivots = scanEpisodicPivots(initialBars);
+        const highTightFlags = scanHighTightFlags(initialBars);
+        
+        if (isMounted) {
+          setChartMarkers([...episodicPivots, ...highTightFlags]);
         }
       } catch (e) {
-        console.error("Scanner fetch failed", e);
+        console.error("Scanner algos failed", e);
       }
       
       if (!isMounted) return;

@@ -18,7 +18,8 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ charts, ledger }: DashboardClientProps) {
-  const [activeSymbol, setActiveSymbol] = useState<string>(charts[0]?.symbol || '');
+  const safeCharts = charts || [];
+  const [activeSymbol, setActiveSymbol] = useState<string>(safeCharts[0]?.symbol || '');
   const [gridColumns, setGridColumns] = useState<GridColumns>(4);
   const [emas, setEmas] = useState<EMAConfig[]>([
     { period: 9, color: '#f59e0b', enabled: false },
@@ -30,16 +31,30 @@ export function DashboardClient({ charts, ledger }: DashboardClientProps) {
   const [timeframe, setTimeframe] = useState<'1D' | '1W'>('1D');
 
   const toggleEma = (period: number) => {
-    setEmas(prev => prev.map(e => e.period === period ? { ...e, enabled: !e.enabled } : e));
+    setEmas(prev => (prev || []).map(e => e.period === period ? { ...e, enabled: !e.enabled } : e));
   };
 
-  const activeData = charts.find(c => c.symbol === activeSymbol) || { symbol: '', bars: [] };
+  const activeData = safeCharts.find(c => c.symbol === activeSymbol) || { symbol: '', bars: [] };
 
   // Filter out the active symbol from the mini grid so there are no duplicates
-  const miniGridItems = charts.filter(c => c.symbol !== activeSymbol);
+  const miniGridItems = safeCharts.filter(c => c.symbol !== activeSymbol);
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-paper font-sans">
+      {safeCharts.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border-2 border-dashed border-hairline rounded-2xl m-6 shadow-sm">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-ink mb-2 font-display">Dashboard Unavailable</h2>
+          <p className="text-ink-light max-w-md text-center mb-6">
+            We couldn't load your chart data. Ensure your data sources are connected or add stocks to your watchlist.
+          </p>
+        </div>
+      ) : (
+      <>
       {/* @ts-expect-error direction prop is not matching react-resizable-panels type definition */}
       <ResizablePanelGroup direction="horizontal" className="h-[60%] min-h-[400px]">
         {/* Main Chart Panel */}
@@ -67,7 +82,7 @@ export function DashboardClient({ charts, ledger }: DashboardClientProps) {
 
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-ink-light uppercase tracking-wider px-1">EMAs</span>
-                  {emas.map(ema => (
+                  {(emas || []).map(ema => (
                     <button
                       key={ema.period}
                       onClick={() => toggleEma(ema.period)}
@@ -122,7 +137,7 @@ export function DashboardClient({ charts, ledger }: DashboardClientProps) {
           items={miniGridItems}
           columns={gridColumns}
           onColumnsChange={setGridColumns}
-          total={charts.length}
+          total={safeCharts.length}
           renderCard={(item) => (
             <MiniChart 
               symbol={item.symbol}
@@ -134,6 +149,8 @@ export function DashboardClient({ charts, ledger }: DashboardClientProps) {
           )}
         />
       </div>
+      </>
+      )}
     </div>
   );
 }
