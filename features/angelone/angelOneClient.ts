@@ -241,45 +241,44 @@ export class AngelOneClient {
     const fromStr = this.formatISODate(fromDate);
     const toStr = this.formatISODate(toDate);
 
-    const { data: cachedData, error: cacheError } = await getSupabase()
-      .from('price_cache')
-      .select('date, open, high, low, close, volume')
-      .eq('symbol', symbol)
-      .gte('date', fromStr)
-      .lte('date', toStr)
-      .order('date', { ascending: true });
+    const { candleCache } = await import('@/lib/cache/candle-cache');
+    const cachedBars = await candleCache.get(symbol, fromStr, toStr, 'ONE_DAY') || [];
 
-    const cachedBars: PriceBar[] = (cachedData || []).map((row) => ({
-      date: row.date,
-      open: Number(row.open),
-      high: Number(row.high),
-      low: Number(row.low),
-      close: Number(row.close),
-      volume: Number(row.volume),
-    }));
-
-    // Find gap
-    let fetchStart = new Date(fromDate);
-    if (cachedBars.length > 0) {
+    // Find gaps
+    const fetchRanges: { start: Date; end: Date }[] = [];
+    
+    if (cachedBars.length === 0) {
+      fetchRanges.push({ start: new Date(fromDate), end: new Date(toDate) });
+    } else {
+      const firstCachedDateStr = cachedBars[0].date;
       const lastCachedDateStr = cachedBars[cachedBars.length - 1].date;
-      if (lastCachedDateStr >= toStr) {
-        return cachedBars;
+      
+      if (firstCachedDateStr > fromStr) {
+        const endOfLeftGap = new Date(firstCachedDateStr);
+        endOfLeftGap.setUTCDate(endOfLeftGap.getUTCDate() - 1);
+        if (new Date(fromDate) <= endOfLeftGap) {
+          fetchRanges.push({ start: new Date(fromDate), end: endOfLeftGap });
+        }
       }
-      fetchStart = new Date(lastCachedDateStr);
-      fetchStart.setUTCDate(fetchStart.getUTCDate() + 1);
+      
+      if (lastCachedDateStr < toStr) {
+        const startOfRightGap = new Date(lastCachedDateStr);
+        startOfRightGap.setUTCDate(startOfRightGap.getUTCDate() + 1);
+        if (startOfRightGap <= new Date(toDate)) {
+          fetchRanges.push({ start: startOfRightGap, end: new Date(toDate) });
+        }
+      }
     }
 
-    if (fetchStart <= toDate) {
+    for (const range of fetchRanges) {
       let retryCount = 0;
       let newBars: PriceBar[] = [];
       
       while (retryCount < 2) {
         try {
-          if (!this.jwtToken) {
-            await this.login();
-          }
-          newBars = await this.fetchHistoricalFromApi(symbolToken, fetchStart, toDate);
-          break; // success
+          if (!this.jwtToken) await this.login();
+          newBars = await this.fetchHistoricalFromApi(symbolToken, range.start, range.end);
+          break;
         } catch (err) {
           if (err instanceof AngelOneAuthError) {
             console.log('Token expired, re-authenticating...');
@@ -292,24 +291,7 @@ export class AngelOneClient {
       }
 
       if (newBars.length > 0) {
-        const rowsToInsert = newBars.map((bar) => ({
-          symbol: symbol,
-          date: bar.date,
-          open: bar.open,
-          high: bar.high,
-          low: bar.low,
-          close: bar.close,
-          volume: bar.volume,
-        }));
-
-        const { error: upsertError } = await getSupabase()
-          .from('price_cache')
-          .upsert(rowsToInsert, { onConflict: 'symbol,date' });
-
-        if (upsertError) {
-          console.error('Error upserting to price_cache', upsertError);
-        }
-        
+        await candleCache.set(symbol, newBars, 'ONE_DAY');
         cachedBars.push(...newBars);
       }
     }
